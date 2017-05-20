@@ -1,0 +1,65 @@
+#ifndef JASED_TOKENS
+#define JASED_TOKENS
+
+enum parse_status {
+	PARSED_OK = 0,	
+	SUB_PARSE_ERROR = 1,
+	UNDEFINED_TOKEN = 2,
+	CUSTOM_SEARCH_ERROR = 3,
+	ADDRESS_PARSER_ERROR = 4,
+
+	DEFAULT_SEARCH_PARSER_ERROR = 5,
+	CUSTOM_SEARCH_PARSER_ERROR = 6,
+
+	NEGATIVE_NUMBER = 7,
+};
+
+enum sed_cmd {
+	CMD_SHIELD_CHAR = '\\',
+
+	CMD_SUB_BEGIN = 's',
+	CMD_SUB_DEFAULT_DELIM = '/',
+
+	CMD_TRANSLATE_BEGIN = 'y',
+
+	DEFAULT_SEARCH_BEGIN = '/',
+	DEFAULT_SEARCH_END = '/',
+
+	CUSTOM_SEARCH_BEGIN = '\\',
+
+	ADDR_DELIM = ',',
+
+	CMD_DELIM = ';',	
+	CMD_DELIM_NEWLINE = '\n',
+	CMD_LIST_BEGIN = '{',
+	CMD_LIST_END = '}',
+
+
+	CMD_DELETE_INIT_SEG_PS = 'D',
+	CMD_DELETE_PS = 'd',
+
+	CMD_MOVE_HS_TO_PS = 'g',
+	CMD_APPEND_HS_TO_PS = 'G',
+
+	CMD_MOVE_PS_TO_HS = 'h',
+	CMD_APPEND_PS_TO_HS = 'H',
+
+	CMD_COPY_PS_TO_STDOUT = 'n',
+	CMD_APPEND_LINE_TO_PS = 'N',
+
+	CMD_PRINT_PS = 'p',
+	CMD_PRINTLN_PS = 'P',
+	CMD_QUIT = 'q',
+
+	CMD_READ = 'r',
+	CMD_WRITE = 'w',
+
+	CMD_EXCHANGE = 'x',
+
+	CMD_NEG = '!',	
+	CMD_LABEL = ':',
+	CMD_PRINT_LINE_NUM = '='
+
+};
+
+#endif
