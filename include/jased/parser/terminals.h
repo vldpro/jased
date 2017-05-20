@@ -1,21 +1,11 @@
-#ifndef JASED_TOKENS
-#define JASED_TOKENS
+#ifndef PARSER_TERMINALS 
+#define PARSER_TERMINALS 
 
-enum parse_status {
-	PARSED_OK = 0,	
-	SUB_PARSE_ERROR = 1,
-	UNDEFINED_TOKEN = 2,
-	CUSTOM_SEARCH_ERROR = 3,
-	ADDRESS_PARSER_ERROR = 4,
+/* Sed terminal symbols */
 
-	DEFAULT_SEARCH_PARSER_ERROR = 5,
-	CUSTOM_SEARCH_PARSER_ERROR = 6,
-
-	NEGATIVE_NUMBER = 7,
-};
-
-enum sed_cmd {
-	CMD_SHIELD_CHAR = '\\',
+typedef enum terminal_char {
+	BACKSLASH = '\\',
+	COMMENT = '#',
 
 	CMD_SUB_BEGIN = 's',
 	CMD_SUB_DEFAULT_DELIM = '/',
@@ -34,9 +24,13 @@ enum sed_cmd {
 	CMD_LIST_BEGIN = '{',
 	CMD_LIST_END = '}',
 
+	CMD_INSERT = 'i',
+	CMD_APPEND = 'a',
+	CMD_CHANGE = 'c',
+	CMD_BRANCH = 'b',
 
-	CMD_DELETE_INIT_SEG_PS = 'D',
 	CMD_DELETE_PS = 'd',
+	CMD_DELETE_INIT_PS = 'D',
 
 	CMD_MOVE_HS_TO_PS = 'g',
 	CMD_APPEND_HS_TO_PS = 'G',
@@ -60,6 +54,6 @@ enum sed_cmd {
 	CMD_LABEL = ':',
 	CMD_PRINT_LINE_NUM = '='
 
-};
+} terminal_char_t;
 
 #endif

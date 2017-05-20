@@ -1,13 +1,22 @@
-#include "jased_parser_util.h"
+#include "jased/parser/util.h"
 
-size_t skip_spaces( char const* string ) {	
-	size_t i = 0;
-	while ( string[i] != '\0' && is_space(string[i++]) );
+#define IS_SPACE( sym ) \
+	sym == ' ' || sym == '\t'
 
-	return i - 1;
+int skip_spaces( chars_queue_t* const cqueue ) {	
+	int i = 0;
+	while ( !cqueue_is_empty(cqueue) ) {
+		char const sym = cqueue_gettop(cqueue);
+
+		if ( IS_SPACE(sym) ) {
+			i++; cqueue_getc(cqueue);
+		} else return i;
+	}
+
+	return -1;
 }
 
-static size_t parse_operand( char const* line, size_t const length, char const end_sym ) {
+/*static size_t parse_operand( char const* line, size_t const length, char const end_sym ) {
 	size_t i = 0;
 	size_t chieldchars_count = 0;
 		
@@ -21,5 +30,5 @@ static size_t parse_operand( char const* line, size_t const length, char const e
 	}
 
 	return i;
-}
+}*/
 

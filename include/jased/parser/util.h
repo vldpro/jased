@@ -2,9 +2,10 @@
 #define JASED_PARSER_UTIL
 
 #include <stddef.h>
+#include "jased/util/chars_queue.h"
 
-size_t skip_spaces( char const* string );
+int skip_spaces( chars_queue_t* const cqueue );
 
-size_t parse_operand( char const* line, size_t const length, char const end_sym);
+/*size_t parse_operand( char const* line, size_t const length, char const end_sym);*/
 
 #endif
