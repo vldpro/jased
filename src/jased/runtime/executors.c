@@ -3,7 +3,13 @@
 #include "jased/runtime/executors.h"
 #include "jased/commands/commands.h"
 
-#define DEFINE_EXECUTOR( name ) \
+/* 	
+	Executors - abstract objects which contains jased commands with their arguments.
+	Runners - functions which iterpret executors.
+	Cleaners - functions which clean executors mem.	
+*/
+
+#define DEFINE_RUNNER( name ) \
 RT_ERR name( executor_t* const executor )
 
 #define DEFINE_CLEANER( name ) \
@@ -13,7 +19,7 @@ executor_t* executor_new() {
 	return (executor_t*)malloc( sizeof(executor_t) );
 }
 
-DEFINE_EXECUTOR( exec_no_params ) {
+DEFINE_RUNNER( exec_no_params ) {
 	runtime_ctx_t const rt_ctx = executor-> rt_ctx;
 
 	return executor-> command.run_no_args( 
@@ -27,7 +33,7 @@ DEFINE_CLEANER( clean_exec_no_params ) {
 
 
 
-DEFINE_EXECUTOR( exec_one_param_str ) {
+DEFINE_RUNNER( exec_one_param_str ) {
 	runtime_ctx_t const rt_ctx = executor-> rt_ctx;
 
 	return executor-> command.run_str_arg( 
@@ -46,7 +52,7 @@ DEFINE_CLEANER( clean_one_param_str ) {
 
 
 
-DEFINE_EXECUTOR( exec_regex_sub ) {
+DEFINE_RUNNER( exec_regex_sub ) {
 	struct regex_sub_args* const regsub_args = executor-> rt_ctx.args_for.reg_sub;
 
 	return executor-> command.run_regsub(
@@ -79,7 +85,7 @@ condition_args_t* condition_args_new() {
 	return (condition_args_t*)malloc( sizeof(condition_args_t) );
 }
 
-DEFINE_EXECUTOR( exec_line_condition ) {
+DEFINE_RUNNER( exec_line_condition ) {
 	struct line_condition_args* const args = executor-> rt_ctx.args_for.condition_args-> line_cond_args;
 
 	if ( jased_ctx-> current_line != args-> line ) {
@@ -97,7 +103,7 @@ DEFINE_CLEANER( clean_line_condition ) {
 
 
 
-DEFINE_EXECUTOR( exec_line_range_condition ) {
+DEFINE_RUNNER( exec_line_range_condition ) {
 	struct lines_range_condition_args* const args = 
 		executor-> rt_ctx.args_for.condition_args-> lines_range_cond_args;
 
