@@ -1,11 +1,11 @@
 #include "jased/runtime/executors_constructors.h"
 
-#define INIT_EXECUTOR( args_, ctx_, cmd_, run_, clean_ ) \
-	new_executor-> rt_ctx.args_for.string_param = args_; \
+#define EXECUTOR_INIT( args_, ctx_, cmd_, run_, clean_ ) \
+	new_executor-> rt_ctx.args_for.any_args = args_; \
 	new_executor-> rt_ctx.args_for.jased_ctx = ctx_; \
-	new_executor-> command.run_str_arg = cmd_; \
+	new_executor-> command.any_command = cmd_; \
 	new_executor-> run = run_; \
-	new_executor-> clean = clean_ \
+	new_executor-> clean = clean_
 
 
 executor_t* construct_regexsub_executor( 
@@ -24,11 +24,10 @@ executor_t* construct_regexsub_executor(
 
 	executor_t* new_executor = executor_new();
 
-	new_executor-> rt_ctx.args_for.regex_sub_args = args;
-	new_executor-> rt_ctx.args_for.jased_ctx = jased_ctx;
-	/* TODO command */
-	new_executor-> run = exec_regex_sub;
-	new_executor-> clean = clean_regex_sub;
+	EXECUTOR_INIT(
+		(void*)args, jased_ctx, NULL,
+		exec_regex_sub, clean_regex_sub
+	);
 
 	return new_executor;
 }
@@ -39,10 +38,10 @@ executor_t* construct_no_params_executor(
 ) {
 	executor_t* new_executor = executor_new();
 
-	new_executor-> rt_ctx.args_for.jased_ctx = jased_ctx;
-	new_executor-> command.run_no_args = command;
-	new_executor-> run = exec_no_params;
-	new_executor-> clean = clean_no_params;
+	EXECUTOR_INIT(
+		NULL, jased_ctx, command,
+		exec_no_params, clean_no_params 
+	);
 
 	return new_executor;
 }
@@ -59,11 +58,10 @@ executor_t* construct_one_param_str_executor(
 
 	executor_t* new_executor = executor_new();
 
-	new_executor-> rt_ctx.args_for.string_param = args;
-	new_executor-> rt_ctx.args_for.jased_ctx = jased_ctx;
-	new_executor-> command.run_str_arg = command;
-	new_executor-> run = exec_no_params;
-	new_executor-> clean = clean_no_params;
+	EXECUTOR_INIT(
+		args, jased_ctx, command,
+		exec_one_param_str, clean_one_param_str
+	);
 
 	return new_executor;
 }
@@ -84,7 +82,9 @@ executor_t* construct_line_condition(
 	executor_t* new_executor = executor_new();
 
 	EXECUTOR_INIT(
-		args, jased_ctx, exec_line_condition, clean_line_condition
+		args, jased_ctx, NULL,
+		exec_line_condition, 
+		clean_line_condition
 	);
 
 	return new_executor;
@@ -109,7 +109,9 @@ executor_t* construct_line_range_condition(
 	executor_t* new_executor = executor_new();
 
 	EXECUTOR_INIT(
-		args, jased_ctx, NULL, exec_line_range_condition, clean_line_range_condition
+		args, jased_ctx, NULL, 
+		exec_line_range_condition, 
+		clean_line_range_condition
 	);
 
 	return new_executor;
@@ -132,7 +134,9 @@ executor_t* construct_regmatch_condition(
 	executor_t* new_executor = executor_new();
 	
 	EXECUTOR_INIT(
-		args, jased_ctx, NULL, exec_regmatch_condition, clean_regmatch_condition	
+		args, jased_ctx, NULL, 
+		exec_regmatch_condition, 
+		clean_regmatch_condition	
 	);
 
 	return new_executor;
