@@ -1,10 +1,11 @@
 #ifndef JASED_EXECUTORS
 #define JASED_EXECUTORS
 
-#include "jased_regex.h"
-#include "jased_string_buffer.h"
-#include "jased_context.h"
-#include "jased_conditions.h"
+#include "jased/commands/regex.h"
+#include "jased/util/string_buffer.h"
+
+#include "jased/runtime/context.h"
+#include "jased/runtime/conditions.h"
 
 #define RT_ERR int 
 
@@ -26,7 +27,7 @@ typedef union cmd_args {
 	struct regex_match_args*     reg_match;
 	struct regex_sub_args*   	 reg_sub;
 	struct string_param_args*    string_param;
-	condition_args_t*     condition; 
+	condition_args_t*     		 condition; 
 } cmd_args_t;
 
 typedef struct runtime_ctx {
@@ -52,7 +53,29 @@ typedef union cmd_type {
 typedef struct executor {
 	runtime_ctx_t rt_ctx;
 	cmd_type_t command;
-	RT_ERR (*exec_command) ( struct executor* const );
+	RT_ERR (*run) ( struct executor* const );
+	void (*clean) ( struct executor* );
 } executor_t;
+
+
+#define DECLARE_EXECUTOR( name ) \
+RT_ERR name( executor_t* const executor );
+
+#define DECLARE_CLEANER( name ) \
+void name( executor_t* executor );
+
+executor_t* executor_new();
+
+DECLARE_EXECUTOR( exec_no_params );
+DECLARE_CLEANER( clean_no_params );
+
+DECLARE_EXECUTOR( exec_one_param_str );
+DECLARE_CLEANER( clean_one_param_str );
+
+DECLARE_EXECUTOR( exec_regex_sub );
+DECLARE_CLEANER( clean_regex_sub );
+
+DECLARE_EXECUTOR( exec_condition );
+DECLARE_CLEANER( clean_condition );
 
 #endif

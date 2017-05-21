@@ -1,9 +1,15 @@
-#include "jased_conditions.h"
-#include "jased_executors.h"
-#include "jased_regex.h"
+#include "jased/runtime/conditions.h"
+#include "jased/runtime/regex.h"
 
 #define DEFINE_CONDITION_EXECUTOR( name ) \
-RT_ERR name( jased_ctx_t* const jased_ctx, condition_args_t* const condition_args )
+RT_ERR name( jased_ctx_t* const jased_ctx, executor* const condition_args )
+
+#define DEFINE_CONDITION_CLEANER( name ) \
+void name( condition_args_t* cond_args );
+
+condition_args_t* condition_args_new() {
+	return (condition_args_t*)malloc( sizeof(condition_args_t) );
+}
 
 DEFINE_CONDITION_EXECUTOR( exec_line_condition ) {
 	struct line_condition_args* const args = condition_args-> line_cond_args;
@@ -14,6 +20,10 @@ DEFINE_CONDITION_EXECUTOR( exec_line_condition ) {
 
 	return 0;
 }
+
+DEFINE_CONDITION_CLEANER( clean_line_condition ) {
+}
+
 
 DEFINE_CONDITION_EXECUTOR( exec_line_range_condition ) {
 	struct lines_range_condition_args* const args = condition_args-> lines_range_cond_args;
