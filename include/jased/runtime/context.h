@@ -1,8 +1,8 @@
 #ifndef JASED_CONTEXT
 #define JASED_CONTEXT
 
-#include "jased_string_buffer.h"
-#include "jased_commands_queue.h"
+#include <stddef.h> 
+#include "jased/util/string_buffer.h"
 
 typedef struct jased_ctx {
 	string_buffer_t* pattern_buffer;
@@ -10,13 +10,11 @@ typedef struct jased_ctx {
 
 	size_t current_line;
 	size_t command_pointer;
-	commands_queue_t* cmd_queue;
-
 } jased_ctx_t;
 
 
 jased_ctx_t* jased_ctx_new();
 
-void jased_ctx_free( jased_ctx_t* ctx );
+void jased_ctx_delete( jased_ctx_t* ctx );
 
 #endif

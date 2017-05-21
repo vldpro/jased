@@ -2,6 +2,7 @@
 #define JASED_CONDITIONS
 
 #include <regex.h>
+#include <stddef.h>
 
 #include "jased/runtime/context.h"
 #define RT_ERR int
