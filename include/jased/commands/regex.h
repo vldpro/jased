@@ -7,7 +7,7 @@
 #ifndef JASED_REGEX
 #define JASED_REGEX
 #include <regex.h>
-#include <jased_string_buffer.h>
+#include <jased/util/string_buffer.h>
 
 #define NO_MATCHES 1
 #define MATCH 0

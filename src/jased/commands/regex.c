@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include <jased_regex.h>
+#include <jased/commands/regex.h>
 
 #define REVERSE_LINK_LEN 2
 

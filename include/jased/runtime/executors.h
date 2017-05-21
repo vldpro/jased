@@ -23,15 +23,21 @@ struct regex_sub_args {
 	int flags;
 };
 
+struct transform_args {
+	string_buffer_t* to_transform;
+	string_buffer_t* transform_seq;
+};
+
 struct string_param_args {
 	string_buffer_t* string;
 };
 
 typedef union cmd_args {
 	void* 						 any_args;
+	struct transform_args*		 tran_args;
 	struct regex_sub_args*   	 reg_sub;
 	struct string_param_args*    string_param;
-	condition_args_t*     		 condition; 
+	condition_args_t*     		 condition_args; 
 } cmd_args_t;
 
 typedef struct runtime_ctx {
@@ -43,12 +49,14 @@ typedef struct runtime_ctx {
 typedef RT_ERR (*no_params_cmd_t) ( jased_ctx_t* const );
 typedef RT_ERR (*string_param_cmd_t) ( jased_ctx_t* const, string_buffer_t* const );
 typedef RT_ERR (*regex_sub_cmd_t) ( jased_ctx_t* const, regex_t const, string_buffer_t* const, int const );
+typedef RT_ERR (*transform_cmd_t) ( jased_ctx_t* const, string_buffer_t* const, string_buffer_t* const );
 
 typedef union cmd_type {
 	void* 			   any_command;
 	no_params_cmd_t    run_no_args;	
 	string_param_cmd_t run_str_arg;
 	regex_sub_cmd_t    run_regsub;
+	transform_cmd_t    run_transform;
 } cmd_type_t;
 
 typedef struct executor {
@@ -59,10 +67,10 @@ typedef struct executor {
 } executor_t;
 
 #define DECLARE_RUNNER( name ) \
-RT_ERR name( executor_t* const executor );
+RT_ERR name( executor_t* const executor )
 
 #define DECLARE_CLEANER( name ) \
-void name( executor_t* executor );
+void name( executor_t* executor )
 
 /* CONSTRUCTORS */
 
@@ -70,9 +78,17 @@ executor_t* executor_new();
 
 executor_t* construct_regexsub_executor( 
 	jased_ctx_t* const jased_ctx, 
+	regex_sub_cmd_t command,
 	regex_t const regex, 
 	string_buffer_t* const repl, 
 	int const flags 
+);
+
+executor_t* construct_transform_executor(
+	jased_ctx_t* const jased_ctx,
+	transform_cmd_t command,
+	string_buffer_t* const to_transform,
+	string_buffer_t* const transform_seq
 );
 
 executor_t* construct_no_params_executor( 
@@ -82,8 +98,8 @@ executor_t* construct_no_params_executor(
 
 executor_t* construct_one_param_str_executor( 
 	jased_ctx_t* const jased_ctx, 
-	string_buffer_t* const str,
-	string_param_cmd_t command
+	string_param_cmd_t command,
+	string_buffer_t* const str
 );
 
 executor_t* construct_line_condition(
@@ -119,7 +135,7 @@ executor_t* construct_line_regmatch_condition(
 	int const on_fail_cmd
 );
 
-executor_t* construct_line_regmatch_condition(
+executor_t* construct_regmatch_line_condition(
 	jased_ctx_t* const jased_ctx,
 	regex_t const regstart,
 	int const end,
@@ -127,6 +143,7 @@ executor_t* construct_line_regmatch_condition(
 );
 
 /* RUNNERS AND CLEANERS */
+
 
 DECLARE_RUNNER( exec_no_params );
 DECLARE_CLEANER( clean_no_params );
@@ -136,6 +153,9 @@ DECLARE_CLEANER( clean_one_param_str );
 
 DECLARE_RUNNER( exec_regex_sub );
 DECLARE_CLEANER( clean_regex_sub );
+
+DECLARE_RUNNER( exec_transform);
+DECLARE_CLEANER( clean_transform );
 
 /* CONDITIONS */
 
@@ -148,8 +168,8 @@ DECLARE_CLEANER( clean_line_range_condition );
 DECLARE_RUNNER( exec_regmatch_condition );
 DECLARE_CLEANER( clean_regmatch_condition );
 
-DECLARE_RUNNER( exec_regmatch_range_condtion );
-DECLARE_CLEANER( clean_regmatch_range_condtion );
+DECLARE_RUNNER( exec_regmatch_range_condition );
+DECLARE_CLEANER( clean_regmatch_range_condition );
 
 DECLARE_RUNNER( exec_line_regmatch_condition );
 DECLARE_CLEANER( clean_line_regmatch_condition );

@@ -29,4 +29,6 @@ void sbuffer_delete( string_buffer_t* buffer );
 
 void sbuffer_set_end_of_string( string_buffer_t* const buffer, size_t const i );
 
+int sbuffer_is_empty( string_buffer_t* const buffer);
+
 #endif

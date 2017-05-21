@@ -1,7 +1,6 @@
 #include <stddef.h>
 
 #include "jased/runtime/executors.h"
-#include "jased/commands/commands.h"
 
 /* 	
 	Executors - abstract objects which contains jased commands with their arguments.
@@ -27,8 +26,28 @@ DEFINE_RUNNER( exec_no_params ) {
 	);
 }
 
-DEFINE_CLEANER( clean_exec_no_params ) {
-	free(executor);	
+DEFINE_CLEANER( clean_no_params ) {
+	free( executor );	
+}
+
+
+DEFINE_RUNNER( exec_transform ) {
+	runtime_ctx_t const rt_ctx = executor-> rt_ctx;
+
+	return executor-> command.run_transform(
+		rt_ctx.jased_ctx,
+		rt_ctx.args_for.tran_args-> to_transform,
+		rt_ctx.args_for.tran_args-> transform_seq
+	);
+}
+
+DEFINE_CLEANER( clean_transform ) {
+	runtime_ctx_t const rt_ctx = executor-> rt_ctx;
+
+	sbuffer_delete( rt_ctx.args_for.tran_args-> to_transform );
+	sbuffer_delete( rt_ctx.args_for.tran_args-> transform_seq );
+	free( rt_ctx.args_for.tran_args );
+	free( executor );
 }
 
 
@@ -45,7 +64,7 @@ DEFINE_RUNNER( exec_one_param_str ) {
 DEFINE_CLEANER( clean_one_param_str ) {
 	runtime_ctx_t const rt_ctx = executor-> rt_ctx;
 
-	free( rt_ctx.args_for.string_param-> string );
+	sbuffer_delete( rt_ctx.args_for.string_param-> string );
 	free( rt_ctx.args_for.string_param );
 	free( executor );
 }
@@ -66,17 +85,10 @@ DEFINE_RUNNER( exec_regex_sub ) {
 DEFINE_CLEANER( clean_regex_sub ) {
 	struct regex_sub_args* const regsub_args = executor-> rt_ctx.args_for.reg_sub;
 
-	regfree( regsub_args-> regex );	
-	free( regsub_args-> replacement );	
+	/*regfree( regsub_args-> regex );	*/
+	sbuffer_delete( regsub_args-> replacement );	
 	free( regsub_args );
 	free( executor );
-}
-
-DEFINE_CLEANER( clean_condition ) {
-	runtime_ctx_t const rt_ctx = executor-> rt_ctx;
-
-	condition_args_free( rt_ctx.args_for.condition );
-	free(executor);
 }
 
 /* CONDITIONS */
@@ -87,6 +99,7 @@ condition_args_t* condition_args_new() {
 
 DEFINE_RUNNER( exec_line_condition ) {
 	struct line_condition_args* const args = executor-> rt_ctx.args_for.condition_args-> line_cond_args;
+	jased_ctx_t* jased_ctx = executor-> rt_ctx.jased_ctx;
 
 	if ( jased_ctx-> current_line != args-> line ) {
 		jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
@@ -107,6 +120,8 @@ DEFINE_RUNNER( exec_line_range_condition ) {
 	struct lines_range_condition_args* const args = 
 		executor-> rt_ctx.args_for.condition_args-> lines_range_cond_args;
 
+	jased_ctx_t* jased_ctx = executor-> rt_ctx.jased_ctx;
+
 	if ( jased_ctx-> current_line <= args-> start 
 		&& jased_ctx-> current_line >= args-> end ) {
 		
@@ -124,11 +139,13 @@ DEFINE_CLEANER( clean_line_range_condition ) {
 
 
 
-DEFINE_CONDITION_EXECUTOR( exec_regmatch_condition ) {
+DEFINE_RUNNER( exec_regmatch_condition ) {
 	struct regmatch_condition_args* const args = 
 		executor-> rt_ctx.args_for.condition_args-> regmatch_cond_args;
 
-	if ( !match( jased_ctx-> pattern_buffer-> char_at, args-> regex ) ) {
+	jased_ctx_t* jased_ctx = executor-> rt_ctx.jased_ctx;
+
+	if ( !match( jased_ctx-> pattern_space-> char_at, args-> regex ) ) {
 		jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
 	}
 
@@ -136,28 +153,30 @@ DEFINE_CONDITION_EXECUTOR( exec_regmatch_condition ) {
 }
 
 DEFINE_CLEANER( clean_regmatch_condition ) {
-	regfree( executor-> rt_ctx.args_for.condition_args-> regmatch_cond_args-> regex )
-	free( executor-> rt_ctx.args_for.condition_args-> regmatch_cond_args )
+	/*regfree( executor-> rt_ctx.args_for.condition_args-> regmatch_cond_args-> regex ) */
+	free( executor-> rt_ctx.args_for.condition_args-> regmatch_cond_args );
 	free( executor-> rt_ctx.args_for.condition_args );
 	free( executor );
 }
 
-DEFINE_CONDITION_EXECUTOR( exec_regmatch_range_condition ) {
+DEFINE_RUNNER( exec_regmatch_range_condition ) {
 	struct regmatch_range_condition_args* const args = 
 		executor-> rt_ctx.args_for.condition_args-> regmatch_range_cond_args;
+
+	jased_ctx_t* jased_ctx = executor-> rt_ctx.jased_ctx;
 
 	if ( args-> is_start_matched && args-> is_end_matched ) {
 		jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
 		
 	} else if ( !args-> is_start_matched ) {
-		if ( !match(jased_ctx-> pattern_buffer-> char_at, args-> start) ) {
+		if ( !match(jased_ctx-> pattern_space-> char_at, args-> start) ) {
 			jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
 		} else {
 			args-> is_start_matched = MATCH;
 		}
 
 	} else if ( !args-> is_end_matched ) {
-		if ( !match(jased_ctx-> pattern_buffer-> char_at, args-> end) ) {
+		if ( !match(jased_ctx-> pattern_space-> char_at, args-> end) ) {
 			jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
 		} else {
 			args-> is_end_matched = MATCH;
@@ -168,22 +187,24 @@ DEFINE_CONDITION_EXECUTOR( exec_regmatch_range_condition ) {
 }
 
 DEFINE_CLEANER( clean_regmatch_range_condition ) {
-		regfree( executor-> rt_ctx.args_for.condition_args-> regmatch_range_cond_args-> start );
-		regfree( executor-> rt_ctx.args_for.condition_args-> regmatch_range_cond_args-> end );
+		/*regfree( executor-> rt_ctx.args_for.condition_args-> regmatch_range_cond_args-> start );
+		regfree( executor-> rt_ctx.args_for.condition_args-> regmatch_range_cond_args-> end ); */
 		free( executor-> rt_ctx.args_for.condition_args-> regmatch_range_cond_args );
 		free( executor-> rt_ctx.args_for.condition_args );
 		free( executor );
 }
 
-DEFINE_CONDITION_EXECUTOR( exec_line_regmatch_condition ) {
+DEFINE_RUNNER( exec_line_regmatch_condition ) {
 	struct line_regmatch_range_condition_args* const args = 
 		executor-> rt_ctx.args_for.condition_args-> line_regmatch_range_cond_args;
+
+	jased_ctx_t* jased_ctx = executor-> rt_ctx.jased_ctx;
 
 	if ( jased_ctx-> current_line < args-> start || args-> is_end_matched ) {
 		jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
 
 	} else if ( !args-> is_end_matched ) {
-		if ( !match(jased_ctx-> pattern_buffer-> char_at, args-> end) ) {
+		if ( !match(jased_ctx-> pattern_space-> char_at, args-> end) ) {
 			jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
 		} else {
 			args-> is_end_matched = MATCH;
@@ -194,21 +215,23 @@ DEFINE_CONDITION_EXECUTOR( exec_line_regmatch_condition ) {
 }
 
 DEFINE_CLEANER( clean_line_regmatch_condition ) {
-	regfree( executor-> rt_ctx.args_for.condition_args-> line_regmatch_range_cond_args-> end );
+	/*regfree( executor-> rt_ctx.args_for.condition_args-> line_regmatch_range_cond_args-> end ); */
 	free( executor-> rt_ctx.args_for.condition_args-> line_regmatch_range_cond_args );
 	free( executor-> rt_ctx.args_for.condition_args );
 	free( executor );
 }
 
-DEFINE_CONDITION_EXECUTOR( exec_regmatch_line_condition ) {
+DEFINE_RUNNER( exec_regmatch_line_condition ) {
 	struct regmatch_line_range_condition_args* const args = 
 		executor-> rt_ctx.args_for.condition_args-> regmatch_line_range_cond_args;
+
+	jased_ctx_t* jased_ctx = executor-> rt_ctx.jased_ctx;
 
 	if ( args-> is_start_matched && args-> end < jased_ctx-> current_line ) {
 		jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
 
 	} else if ( !args-> is_start_matched )  {
-		if ( !match(jased_ctx-> pattern_buffer-> char_at, args-> start) ) {
+		if ( !match(jased_ctx-> pattern_space-> char_at, args-> start) ) {
 			jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
 		} else {
 			args-> is_start_matched = MATCH;
@@ -219,7 +242,7 @@ DEFINE_CONDITION_EXECUTOR( exec_regmatch_line_condition ) {
 }
 
 DEFINE_CLEANER( clean_regmatch_line_condition ) {
-	regfree( executor-> rt_ctx.args_for.condition_args-> regmatch_line_range_cond_args-> start );
+	/* regfree( executor-> rt_ctx.args_for.condition_args-> regmatch_line_range_cond_args-> start ); */
 	free( executor-> rt_ctx.args_for.condition_args-> regmatch_line_range_cond_args );
 	free( executor-> rt_ctx.args_for.condition_args );
 	free( executor );

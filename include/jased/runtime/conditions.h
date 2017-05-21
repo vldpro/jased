@@ -64,21 +64,6 @@ typedef union condition_args {
 	struct regmatch_line_range_condition_args* regmatch_line_range_cond_args;
 } condition_args_t;
 
-#define DECLARE_CONDITION_EXECUTOR( name ) \
-RT_ERR name( jased_ctx_t* const jased_ctx, condition_args_t* const condition_args )
-
 condition_args_t* condition_args_new();
-
-DECLARE_CONDITION_EXECUTOR( exec_line_condition );
-
-DECLARE_CONDITION_EXECUTOR( exec_line_range_condition );
-
-DECLARE_CONDITION_EXECUTOR( exec_regmatch_condition );
-
-DECLARE_CONDITION_EXECUTOR( exec_regmatch_range_condition );
-
-DECLARE_CONDITION_EXECUTOR( exec_line_regmatch_condition );
-
-DECLARE_CONDITION_EXECUTOR( exec_regmatch_line_condition );
 
 #endif
