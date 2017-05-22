@@ -14,6 +14,9 @@ typedef struct jased_ctx {
 	int in_stream;
 	int out_stream;
 
+	int is_new_cycle_enable;
+	int is_default_output_enable;
+
 	int commands;
 
 	io_buffer_t* io_buffer;

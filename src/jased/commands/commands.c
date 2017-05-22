@@ -48,8 +48,13 @@ DEFINE_TRANSFORM_CMD( transformcmd ) {
 }
 
 DEFINE_ONE_STRING_PARAM_CMD( append ) {
-	/* place str on out	 */
-	/* start new cycle */
+	if ( jased_ctx-> is_default_output_enable ) {
+		print( jased_ctx-> pattern_space );
+	}
+
+	print(str, jased_ctx-> out_stream );
+	jased_ctx-> is_new_cycle_enable = 1;
+
 	return 0;
 }
 
@@ -63,15 +68,23 @@ DEFINE_ONE_STRING_PARAM_CMD( branch ) { return 0; }
 
 /* i command */
 DEFINE_ONE_STRING_PARAM_CMD( insert ) {
-	/* print */
+	print(str, jased_ctx-> out_stream );
+	jased_ctx-> is_new_cycle_enable = 1;
+
+	if ( jased_ctx-> is_default_output_enable ) {
+		print( jased_ctx-> pattern_space );
+	}
+
 	return 0;
 }
 
 /* c command */
 DEFINE_ONE_STRING_PARAM_CMD( change ) {
 	sbuffer_clear( jased_ctx-> pattern_space );
-	/* print */
-	/* start new cycle */
+	
+	print( str, jased_ctx-> out_stream );
+	jased_ctx-> is_new_cycle_enable = 1;
+
 	return 0;
 }
 
@@ -90,8 +103,7 @@ DEFINE_NO_PARAMS_CMD( delete_first_line_ps ) {
 	}
 
 	if ( i == pattern_space-> eos ) {
-		/* handle err */
-		return 0;
+		sbuffer_clear( jased_ctx-> pattern_space );
 	}
 
 	sbuffer_reinit( 
@@ -99,13 +111,16 @@ DEFINE_NO_PARAMS_CMD( delete_first_line_ps ) {
 		pattern_space-> char_at + i + 1 
 	);
 
-	/* start new cycle */
+	jased_ctx-> is_new_cycle_enable = 1;
+
 	return 0;
 }
 
 /* n command */
 DEFINE_NO_PARAMS_CMD( next ) {
-	/*print( jased_ctx-> pattern_space );	*/
+	if ( is_default_output_enable )
+		print( jased_ctx-> pattern_space, jased-> out_stream );
+
 	sbuffer_clear( jased_ctx-> pattern_space );
 
 	readln( 
@@ -117,32 +132,43 @@ DEFINE_NO_PARAMS_CMD( next ) {
 	return 0;
 }
 
+/* q command */
+DEFINE_NO_PARAMS_CMD( quit ) {
+	return 1;
+}
+
 /* N command */
 DEFINE_NO_PARAMS_CMD( next_append ) {
 	string_buffer_t* buf = sbuffer_new();
 
-	readln(
+	ssize_t res = readln(
 		jased_ctx-> in_stream,
 		jased_ctx-> io_buffer,
 		buf
 	);
 
+	if ( res == 0 ) return 1;
+
 	sbuffer_append_buf(
-		jased_ctx-> pattern_space, buf
+		buf, jased_ctx-> pattern_space
 	);
+
+	sbuffer_delete( jased_ctx-> pattern_space );
+
+	jased_ctx-> pattern_space = buf;	
 
 	return 0;
 }
 
 /* = command */
 DEFINE_NO_PARAMS_CMD( print_linenum ) {
-	/* print( jased_ctx-> current_line ); */
+	println( jased_ctx-> current_line, jased_ctx-> out_stream );
 	return 0;
 }
 
 /* p command */
 DEFINE_NO_PARAMS_CMD( print_ps ) {
-	/* print( jased_ctx-> pattern_space ); */
+	print( jased_ctx-> pattern_space, jased_ctx-> out_stream );
 	return 0;
 }
 
@@ -151,15 +177,11 @@ DEFINE_NO_PARAMS_CMD( print_line_ps ) {
 	char* buf = jased_ctx-> pattern_space-> char_at;
 	size_t i = 0;
 
-	if ( sbuffer_is_empty(jased_ctx-> pattern_space) ) {
-		return 0;
-	}
-
 	for ( ; i < jased_ctx-> pattern_space-> eos; i++ ) {
 		if ( buf[i] == '\n' ) break;
 	}
 
-	/*write( jased_ctx-> stream, buf, i );*/
+	write( jased_ctx-> stream, buf, i );
 	return 0;
 }
 
