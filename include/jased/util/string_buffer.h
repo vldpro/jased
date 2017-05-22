@@ -19,9 +19,13 @@ void sbuffer_reinit_part( string_buffer_t* const buffer, char const* const strin
 
 void sbuffer_append( string_buffer_t* const buffer, char const* const byte_seq, size_t const length );
 
+void sbuffer_append_char( string_buffer_t* const buffer, char const sym );
+
 void sbuffer_append_buf( string_buffer_t* const dest, string_buffer_t const* const src );
 
-string_buffer_t* sbuffer_clone( string_buffer_t const* const buffer);
+string_buffer_t* sbuffer_clone( string_buffer_t const* const buffer );
+
+string_buffer_t* sbuffer_truncate( string_buffer_t* const buffer );
 
 void sbuffer_clear( string_buffer_t* const buffer );
 

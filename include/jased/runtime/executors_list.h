@@ -14,7 +14,7 @@ typedef struct executors_list {
 
 executors_list_t* execlist_new();
 
-void execlist_free( executors_list_t* execlist );
+void execlist_delete( executors_list_t* execlist );
 
 void execlist_push_back( executors_list_t* const execlist, executor_t* const executor );
 

@@ -22,6 +22,8 @@ char* io_buffer_get_start_ptr( io_buffer_t const * const io_buffer );
 
 void io_buffer_clear( io_buffer_t* const io_buffer );
 
+void io_buffer_delete( io_buffer_t* const io_buffer );
+
 ssize_t io_buffer_read_next( int const stream, io_buffer_t* const io_buffer );
 
 

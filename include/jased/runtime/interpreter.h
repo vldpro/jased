@@ -6,4 +6,7 @@ typedef struct interpreter_ctx {
 } interpreter_ctx_t;
 
 interpreter_ctx_t* interpreter_ctx_new();
+
 void interpreter_ctx_delete( interpreter_ctx_t* int_ctx );
+
+void run( interpreter_ctx_t* const int_ctx );

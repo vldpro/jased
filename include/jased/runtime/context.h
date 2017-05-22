@@ -14,6 +14,8 @@ typedef struct jased_ctx {
 	int in_stream;
 	int out_stream;
 
+	int commands;
+
 	io_buffer_t* io_buffer;
 } jased_ctx_t;
 

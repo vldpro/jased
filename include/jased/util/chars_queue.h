@@ -19,6 +19,7 @@ int cqueue_is_empty( chars_queue_t* const cqueue );
 
 void cqueue_free( chars_queue_t* cqueue );
 
+void cqueue_push_back( chars_queue_t* cqueue, char const sym );
 
 
 #endif

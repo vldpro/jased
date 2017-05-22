@@ -11,7 +11,7 @@ executors_list_t* execlist_new() {
 	return execlist;
 }
 
-void execlist_free( executors_list_t* execlist) {
+void execlist_delete( executors_list_t* execlist) {
 	size_t i = 0;
 	for ( ; i < execlist-> size; i++ ) {
 		execlist-> executors[i]-> clean(

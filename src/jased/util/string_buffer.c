@@ -66,6 +66,15 @@ void sbuffer_append( string_buffer_t* const buffer, char const* const byte_seq, 
 	buffer-> char_at[ buffer-> eos ] = '\0';
 }
 
+void sbuffer_append_char( string_buffer_t* const buffer, char const sym ) {
+	if ( buffer-> eos  + 2 > buffer-> size ) {
+		on_overflow( buffer, length );
+	}
+
+	buffer-> char_at[ ++(buffer-> eos) ] = sym;
+	buffer-> char_at[ (buffer-> eos) ] = '\0';
+}
+
 void sbuffer_append_buf( string_buffer_t* const dest, string_buffer_t const* const src ) {
 	sbuffer_append( dest, src-> char_at, src-> eos );
 }
@@ -77,6 +86,11 @@ void sbuffer_set_end_of_string( string_buffer_t* buffer, size_t const i ) {
 
 string_buffer_t* sbuffer_clone( string_buffer_t const* const buffer) {
 	return sbuffer_init( buffer-> char_at );
+}
+
+string_buffer_t* sbuffer_truncate( string_buffer_t* const buffer ) {
+	buffer-> char_at = realloc( buffer-> char_at, buffer-> eos * sizeof(char) + 1  );
+	return (string_buffer_t*)buffer;
 }
 
 void sbuffer_clear( string_buffer_t* buffer ) {
