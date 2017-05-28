@@ -12,11 +12,36 @@
 
 #include "jased/commands/commands.h"
 
+
+#ifdef DEBUG_PARSING
+#include <jased/io/io.h>
+#include <unistd.h>
+#endif
+
 static void delete( chars_queue_t* cqueue, parser_ctx_t* parser_ctx, string_buffer_t* sbuffer ) {
     sbuffer_delete( sbuffer );
     cqueue_delete( cqueue );
     parser_ctx_delete( parser_ctx );
 }
+
+#ifdef DEBUG_PARSING
+static void debug_parsing( char* const result, interpreter_ctx_t* const int_ctx ) {
+    printerr("Parsing debug info from 'script_parser':\n");
+
+    printerr("\t-dbg- Parsing status: ");
+    printerr( result );
+    printerr("\n");
+
+    printerr("\t-dbg- Parsed commands_count: "); 
+    print_int( STDERR_FILENO, int_ctx-> jased_ctx-> commands_count );
+    printerr("\n");
+
+    printerr("\t-dbg- Default output: "); 
+    printerr( int_ctx-> jased_ctx-> is_default_output_enable ? "ENABLE" : "DISABLE");
+    printerr("\n");
+
+}
+#endif
 
 parser_exit_status_t
 parse_commandline_script( char* const script, interpreter_ctx_t* const int_ctx ) {
@@ -32,6 +57,10 @@ parse_commandline_script( char* const script, interpreter_ctx_t* const int_ctx )
         exit_stat.stop_on_line = 1;
         exit_stat.stop_on_symbol = cqueue-> start;
         exit_stat.parser_status = stat;
+
+        #ifdef DEBUG_PARSING
+        debug_parsing("FAILED", int_ctx ); 
+        #endif
 
         delete( cqueue, parser_ctx, script_buf );
         return exit_stat; 
@@ -57,8 +86,12 @@ parse_commandline_script( char* const script, interpreter_ctx_t* const int_ctx )
         )
     );
 
-
     delete( cqueue, parser_ctx, script_buf );
+
+
+    #ifdef DEBUG_PARSING
+    debug_parsing("OK", int_ctx ); 
+    #endif
 
     exit_stat.is_ok = 1;
 

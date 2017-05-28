@@ -87,7 +87,7 @@ ssize_t print_int( int const stream, int const value ) {
     int remainder = 0;
     int whole = value;
 
-    if ( whole == '0' ) {
+    if ( whole == 0 ) {
         WRITE( stream, "0", 1);
         return 0;
     }

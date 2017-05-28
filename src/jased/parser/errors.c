@@ -16,13 +16,15 @@ char* const get_errmsg( parser_status_t status ) {
 
         case UNTERMINATED_SEARCH: return "Parsing error: unterminated search (/ or \\c) command.\n";
 
-        case UNCORRECT_REGEX: return "Parsing error: invalid syntax for regular expression\n";
+        case UNCORRECT_REGEX: return "Parsing error: invalid syntax for regular expression.\n";
 
-        case UNOPENED_CMD_LIST: return "Parsing error: commands list close, but not started\n";
+        case UNOPENED_CMD_LIST: return "Parsing error: commands list close, but not started.\n";
 
-        case UNCLOSED_CMD_LIST: return "Parsing error: unclosed commands list\n";
+        case UNCLOSED_CMD_LIST: return "Parsing error: unclosed commands list.\n";
 
-        case EMPTY_FILE: return "Parsing error: empty file\n";
+        case EMPTY_FILE: return "Parsing error: empty file.\n";
+
+        case ILLEGAL_CHARACTER: return "Parsing error: illegal command.\n";
 
         default: return "Internal error: Oops... this kind of error is not declared by developer.\n";
     }

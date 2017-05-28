@@ -1,6 +1,8 @@
 #include <string.h> 
 #include <malloc.h>
 #include <unistd.h>
+#include <errno.h>
+#include <string.h>
 
 #include <fcntl.h>
 #include <sys/types.h>
@@ -29,8 +31,11 @@ static void delete( struct cmdline_ctx* cmdline_ctx, interpreter_ctx_t** context
 
 #define CHECK_OPEN( fd, filename ) \
    if ( fd == -1 ) { \
-       printerr("problem with reading from file"); \
+       int errnum = errno; \
+       printerr("jased: can not open file or directory '"); \
        printerr( filename ); \
+       printerr( "'. "); \
+       printerr( strerror(errnum) ); \
        printerr("\n"); \
        delete( cmdline_ctx, int_contexts, total_scripts_count ); \
        return ERROR_IN_OPEN_FILES; \
@@ -42,11 +47,12 @@ static int is_parsing_ok( parser_exit_status_t parser_exval ) {
 
     printerr( get_errmsg(parser_exval.parser_status) );
 
-    printerr( "Parsing stopped on line: " );
+    printerr( "Parsing stopped. (line " );
     print_int( STDERR_FILENO, parser_exval.stop_on_line );
 
-    printerr( "\non symbol: " );
+    printerr( ", sym " );
     print_int( STDERR_FILENO, parser_exval.stop_on_symbol );
+    printerr(")\n");
 
     return 0;
 }
@@ -57,9 +63,14 @@ int main( int argc, char** argv ) {
     interpreter_ctx_t** int_contexts;
     size_t i = 0;
 
+    #ifdef DEBUG_PARSING
+    printerr( "jased: compiled in mode DEBUG_PARSING\n\n" );
+    #endif
+
     if ( cmdline_ctx == NULL ) { 
         return ERROR_IN_CMDLINE_ARGS;
     }
+
     total_scripts_count = 
         cmdline_ctx-> script_files_count + cmdline_ctx-> args_scripts_count;
 
