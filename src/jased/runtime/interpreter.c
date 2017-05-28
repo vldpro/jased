@@ -66,6 +66,11 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
 			    	if ( jased_ctx-> is_new_cycle_enable ) 
 			    		break;
 
+                    if ( int_contexts[j]-> executors_list-> executors[i] == NULL ) {
+                        printerr("Internal error: empty executor.\n");
+                        exit(5);
+                    }
+
 			    	command_exval = int_contexts[j]-> executors_list-> executors[i]-> run(
 			    		int_contexts[j]-> executors_list-> executors[i]
 			    	);

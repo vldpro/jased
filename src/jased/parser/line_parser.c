@@ -695,7 +695,7 @@ static void push_noargs_command( no_params_cmd_t cmd, interpreter_ctx_t* const i
 		int_ctx-> executors_list,
 		int_ctx-> jased_ctx-> commands_count++, 
 		construct_no_params_executor(
-			int_ctx-> jased_ctx, cmd	
+			int_ctx-> jased_ctx, cmd
 		)
 	);
 }

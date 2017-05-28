@@ -74,7 +74,7 @@ int main( int argc, char** argv ) {
     total_scripts_count = 
         cmdline_ctx-> script_files_count + cmdline_ctx-> args_scripts_count;
 
-    int_contexts = malloc( sizeof(interpreter_ctx_t*) * total_scripts_count );
+    int_contexts = (interpreter_ctx_t**)malloc( sizeof(interpreter_ctx_t*) * total_scripts_count );
 
     /* create contexts */
     for ( i = 0; i < total_scripts_count; i++ ) {

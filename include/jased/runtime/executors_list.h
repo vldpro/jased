@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include "jased/runtime/executors.h"
 
-#define DEFAULT_CMD_QUEUE_SIZE 100
+#define DEFAULT_CMD_QUEUE_SIZE 20 
 
 typedef struct executors_list {
 	executor_t** executors;

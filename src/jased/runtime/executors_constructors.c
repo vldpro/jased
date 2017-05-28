@@ -41,7 +41,7 @@ executor_t* construct_regexsub_executor(
             int errnum = errno;
             printerr("jased: can not open file '");
             printerr( wfile-> char_at );
-            printerr("' ");
+            printerr("' : ");
             printerr( strerror(errnum) );
             printerr("\n");
             exit(4);
@@ -214,6 +214,8 @@ executor_t* construct_regmatch_range_condition(
 	args-> regmatch_range_cond_args-> start = regstart;
 	args-> regmatch_range_cond_args-> end = regend;
 	args-> regmatch_range_cond_args-> if_false_cmd_ptr = on_fail_cmd;
+	args-> regmatch_range_cond_args-> is_start_matched = 0;
+	args-> regmatch_range_cond_args-> is_end_matched = 0;
 
 	
 	EXECUTOR_INIT(
@@ -241,6 +243,7 @@ executor_t* construct_line_regmatch_condition(
 	args-> line_regmatch_range_cond_args-> start = start;
 	args-> line_regmatch_range_cond_args-> end = regend;
 	args-> line_regmatch_range_cond_args-> if_false_cmd_ptr = on_fail_cmd;
+	args-> line_regmatch_range_cond_args-> is_end_matched = 0;
 	
 	EXECUTOR_INIT(
 		args, jased_ctx,
@@ -267,6 +270,7 @@ executor_t* construct_regmatch_line_condition(
 	args-> regmatch_line_range_cond_args-> start = regstart;
 	args-> regmatch_line_range_cond_args-> end = end;
 	args-> regmatch_line_range_cond_args-> if_false_cmd_ptr = on_fail_cmd;
+	args-> regmatch_line_range_cond_args-> is_start_matched = 0;
 	
 	EXECUTOR_INIT(
 		args, jased_ctx,

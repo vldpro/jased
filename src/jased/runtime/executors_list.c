@@ -1,12 +1,13 @@
 #include "jased/runtime/executors_list.h"
 #include <malloc.h>
+#include <jased/io/io.h>
 
 executors_list_t* execlist_new() {
 	executors_list_t* execlist = (executors_list_t*)malloc( sizeof(executors_list_t) );
 
 	execlist-> capacity = DEFAULT_CMD_QUEUE_SIZE;
 	execlist-> size = 0;
-	execlist-> executors = (executor_t**)malloc( sizeof(executor_t*) * execlist-> size );
+	execlist-> executors = (executor_t**)malloc( sizeof(executor_t*) * execlist-> capacity );
 
 	return execlist;
 }
@@ -27,8 +28,16 @@ executor_t* execlist_get( executors_list_t* const execlist, size_t const i ) {
 }
 
 static void on_overflow( executors_list_t* const execlist ) {
+    executor_t** tmp;
 	execlist-> capacity += DEFAULT_CMD_QUEUE_SIZE;
-	execlist-> executors = realloc( execlist-> executors, sizeof(executor_t) * execlist-> capacity );
+	tmp  = (executor_t**)realloc( execlist-> executors, sizeof(executor_t*) * execlist-> capacity );
+
+    if ( tmp != NULL ) {
+        execlist-> executors = tmp;
+    } else {
+        printerr("jased: out of memory.\n");
+        exit(4);
+    }
 }
 
 void execlist_set( executors_list_t* const execlist, size_t const i, executor_t* const executor ) {
@@ -37,7 +46,7 @@ void execlist_set( executors_list_t* const execlist, size_t const i, executor_t*
 	}
 
 	execlist-> executors[i] = executor;
-	execlist-> size++;
+	(execlist-> size)++;
 }
 
 void execlist_push_back( executors_list_t* const execlist, executor_t * const  executor ) {

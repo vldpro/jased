@@ -1,6 +1,7 @@
 #include <malloc.h>
 #include <string.h>
-#include <jased/util/string_buffer.h>
+#include "jased/util/string_buffer.h"
+#include "jased/io/io.h"
 
 #define DEFAULT_BUFFER_SIZE 1024
 
@@ -49,8 +50,14 @@ void sbuffer_reinit_part( string_buffer_t* const buffer, char const* const strin
 
 static void on_overflow( string_buffer_t* const buffer, size_t const needed_to_append ) {
 	size_t needed = (buffer-> eos + needed_to_append) / DEFAULT_BUFFER_SIZE + 1;
+    char* tmp = (char*)realloc( buffer-> char_at, needed * DEFAULT_BUFFER_SIZE * sizeof(char) );
 
-	buffer-> char_at = (char*)realloc( buffer-> char_at, needed * DEFAULT_BUFFER_SIZE * sizeof(char) );
+    if ( tmp != NULL ) {
+        buffer-> char_at = tmp;
+    } else {
+        printerr("jased: out of memory.\n");
+        exit(5);
+    }
 }
 
 void sbuffer_append( string_buffer_t* const buffer, char const* const byte_seq, size_t const length ) {

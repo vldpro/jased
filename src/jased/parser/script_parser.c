@@ -20,7 +20,8 @@
 
 static void delete( chars_queue_t* cqueue, parser_ctx_t* parser_ctx, string_buffer_t* sbuffer ) {
     cqueue_delete( cqueue );
-    sbuffer_delete( sbuffer );
+    /* TODO DELETE */
+    sbuffer_clear( sbuffer );
     parser_ctx_delete( parser_ctx );
 }
 
