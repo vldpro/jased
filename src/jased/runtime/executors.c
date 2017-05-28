@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <malloc.h>
 
 #include "jased/runtime/executors.h"
 

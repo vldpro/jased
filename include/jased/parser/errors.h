@@ -4,6 +4,7 @@
 typedef enum parser_status {
 	PARSING_OK = 0,
 	UNTERMINATED_SUB,
+	UNTERMINATED_TRAN,
 
 	INVALID_APPEND_SYNTAX,
 	UNCLOSED_APPEND,
@@ -22,5 +23,7 @@ typedef enum parser_status {
 	UNCLOSED_CMD_LIST,
 	EMPTY_FILE
 } parser_status_t;
+
+char* const get_errmsg( parser_status_t status );
 
 #endif

@@ -1,30 +1,47 @@
 #include <malloc.h>
-#include "jased/parser/cmd_parser.h"
 
-struct address_stack* addrstack_new() {
-	struct address_stack* stack = malloc( sizeof(struct address_stack) );
-	stack-> addrs = malloc( sizeof(struct optional) * DEFAULT_ADDRSTACK_SIZE );
-	stack-> depth = 0;
-	stack-> size = DEFAULT_ADDRSTACK_SIZE;
-	return stack;
+#include "jased/parser/parser_context.h"
+
+#define OPTSTACK_DEFAULT_SIZE 20
+
+optional_stack_t* optstack_new() {
+    optional_stack_t* new_stack = malloc( sizeof(optional_stack_t) );
+    new_stack-> conditions = malloc( sizeof(optional_t) * OPTSTACK_DEFAULT_SIZE );
+    new_stack-> top = 0;
+    new_stack-> size = OPTSTACK_DEFAULT_SIZE;
+     
+    return new_stack;
 }
 
-static void on_overflow( struct address_stack* const stack, size_t const new_size ) {
-	stack-> addrs = realloc( stack-> addrs, new_size * sizeof(struct optional) );
+void optstack_delete( optional_stack_t* stack ) {
+    free( stack-> conditions );
+    free( stack );
 }
 
-void addrstack_push( struct address_stack* const stack, struct optional addr ) {
-	if ( stack-> top + 2 > stack-> size )
-		on_overflow( stack, stack-> size + DEFAULT_ADDRSTACK_SIZE );
+void optstack_push( optional_stack_t* const stack, optional_t const opt ) {
+    if ( stack-> size == stack-> top ) {
+        stack-> size += OPTSTACK_DEFAULT_SIZE;
+        stack-> conditions = 
+            realloc( stack-> conditions, sizeof(optional_t) * stack-> size ); 
 
-	stack-> addrs[ ++(stack-> top) ] = addr;
+    }
+
+    stack-> conditions[ stack-> top++ ] = opt;
 }
 
-struct address addrstack_pop( struct address_stack* const stack ) {
-	return stack-> addrs[ stack-> top-- ];
+optional_t optstack_pop( optional_stack_t* const stack ) {
+    return stack-> conditions[--(stack-> top)];
 }
 
-void addrstack_delete( struct address_stack* stack ) {
-	free( stack-> addrs );
-	free( stack );
+
+parser_ctx_t* parser_ctx_new() {
+    parser_ctx_t* new_ctx = malloc( sizeof(parser_ctx_t) );
+    new_ctx-> cond_stack = optstack_new();
+    new_ctx-> depth = 0;
+    return new_ctx;
+}
+
+void parser_ctx_delete( parser_ctx_t* ctx ) {
+    optstack_delete( ctx-> cond_stack );
+    free(ctx);
 }

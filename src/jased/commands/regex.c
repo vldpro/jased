@@ -151,8 +151,6 @@ int transform( char* const string, char const* const to_transform_seq, char cons
 		}
 	}
 
-	puts( string );
-
 	return 0;
 }
 

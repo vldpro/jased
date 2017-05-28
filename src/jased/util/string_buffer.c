@@ -49,10 +49,8 @@ void sbuffer_reinit_part( string_buffer_t* const buffer, char const* const strin
 
 static void on_overflow( string_buffer_t* const buffer, size_t const needed_to_append ) {
 	size_t needed = (buffer-> eos + needed_to_append) / DEFAULT_BUFFER_SIZE + 1;
-	char* old_ptr = buffer-> char_at;
 
 	buffer-> char_at = (char*)realloc( buffer-> char_at, needed * DEFAULT_BUFFER_SIZE * sizeof(char) );
-	if ( old_ptr != buffer-> char_at ) free( old_ptr );
 }
 
 void sbuffer_append( string_buffer_t* const buffer, char const* const byte_seq, size_t const length ) {
@@ -68,10 +66,10 @@ void sbuffer_append( string_buffer_t* const buffer, char const* const byte_seq, 
 
 void sbuffer_append_char( string_buffer_t* const buffer, char const sym ) {
 	if ( buffer-> eos  + 2 > buffer-> size ) {
-		on_overflow( buffer, length );
+		on_overflow( buffer, DEFAULT_BUFFER_SIZE );
 	}
 
-	buffer-> char_at[ ++(buffer-> eos) ] = sym;
+	buffer-> char_at[ (buffer-> eos)++ ] = sym;
 	buffer-> char_at[ (buffer-> eos) ] = '\0';
 }
 

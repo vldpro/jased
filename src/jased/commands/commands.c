@@ -49,10 +49,10 @@ DEFINE_TRANSFORM_CMD( transformcmd ) {
 
 DEFINE_ONE_STRING_PARAM_CMD( append ) {
 	if ( jased_ctx-> is_default_output_enable ) {
-		print( jased_ctx-> pattern_space );
+		print( jased_ctx-> out_stream, jased_ctx-> pattern_space );
 	}
 
-	print(str, jased_ctx-> out_stream );
+	print( jased_ctx-> out_stream, str );
 	jased_ctx-> is_new_cycle_enable = 1;
 
 	return 0;
@@ -68,11 +68,11 @@ DEFINE_ONE_STRING_PARAM_CMD( branch ) { return 0; }
 
 /* i command */
 DEFINE_ONE_STRING_PARAM_CMD( insert ) {
-	print(str, jased_ctx-> out_stream );
+	print( jased_ctx-> out_stream, str );
 	jased_ctx-> is_new_cycle_enable = 1;
 
 	if ( jased_ctx-> is_default_output_enable ) {
-		print( jased_ctx-> pattern_space );
+		print( jased_ctx-> out_stream, jased_ctx-> pattern_space );
 	}
 
 	return 0;
@@ -82,7 +82,7 @@ DEFINE_ONE_STRING_PARAM_CMD( insert ) {
 DEFINE_ONE_STRING_PARAM_CMD( change ) {
 	sbuffer_clear( jased_ctx-> pattern_space );
 	
-	print( str, jased_ctx-> out_stream );
+	print( jased_ctx-> out_stream, str );
 	jased_ctx-> is_new_cycle_enable = 1;
 
 	return 0;
@@ -118,8 +118,8 @@ DEFINE_NO_PARAMS_CMD( delete_first_line_ps ) {
 
 /* n command */
 DEFINE_NO_PARAMS_CMD( next ) {
-	if ( is_default_output_enable )
-		print( jased_ctx-> pattern_space, jased-> out_stream );
+	if ( jased_ctx-> is_default_output_enable )
+		print( jased_ctx-> out_stream, jased_ctx-> pattern_space );
 
 	sbuffer_clear( jased_ctx-> pattern_space );
 
@@ -147,7 +147,7 @@ DEFINE_NO_PARAMS_CMD( next_append ) {
 		buf
 	);
 
-	if ( res == 0 ) return 1;
+	if ( res == -1 ) return 1;
 
 	sbuffer_append_buf(
 		buf, jased_ctx-> pattern_space
@@ -162,13 +162,13 @@ DEFINE_NO_PARAMS_CMD( next_append ) {
 
 /* = command */
 DEFINE_NO_PARAMS_CMD( print_linenum ) {
-	println( jased_ctx-> current_line, jased_ctx-> out_stream );
+	/* print(  jased_ctx-> out_stream, jased_ctx-> current_line ); */
 	return 0;
 }
 
 /* p command */
 DEFINE_NO_PARAMS_CMD( print_ps ) {
-	print( jased_ctx-> pattern_space, jased_ctx-> out_stream );
+	print( jased_ctx-> out_stream, jased_ctx-> pattern_space );
 	return 0;
 }
 
@@ -181,7 +181,7 @@ DEFINE_NO_PARAMS_CMD( print_line_ps ) {
 		if ( buf[i] == '\n' ) break;
 	}
 
-	write( jased_ctx-> stream, buf, i );
+	write( jased_ctx-> out_stream, buf, i );
 	return 0;
 }
 

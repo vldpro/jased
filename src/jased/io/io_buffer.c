@@ -31,7 +31,7 @@ void io_buffer_clear( io_buffer_t* const io_buffer ) {
 	io_buffer-> end_idx = -1;
 }
 
-void io_buffers_delete( io_buffer_t* io_buffer ) {
+void io_buffer_delete( io_buffer_t* io_buffer ) {
 	free( io_buffer-> buffer );
 	free( io_buffer );
 }

@@ -6,18 +6,24 @@
 #include "jased/io/io.h"
 
 typedef struct jased_ctx {
+    /* sed hold and pattern space */
 	string_buffer_t* pattern_space;
 	string_buffer_t* hold_space;
 
+    /* number of line, which handling by interpeter */
 	size_t current_line;
+    /* current command pointer */
 	size_t command_pointer;
+
+    /* in and out streams for commands */
 	int in_stream;
 	int out_stream;
 
 	int is_new_cycle_enable;
 	int is_default_output_enable;
 
-	int commands;
+    /* count of parsed commands */
+	int commands_count;
 
 	io_buffer_t* io_buffer;
 } jased_ctx_t;

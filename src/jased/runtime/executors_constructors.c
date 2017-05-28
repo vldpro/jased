@@ -34,7 +34,7 @@ executor_t* construct_regexsub_executor(
 	return new_executor;
 }
 
-executor_t* construct_trasform_executor(
+executor_t* construct_transform_executor(
 	jased_ctx_t* const jased_ctx,
 	transform_cmd_t command,
 	string_buffer_t* const to_transform,

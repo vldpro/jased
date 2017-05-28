@@ -10,6 +10,11 @@ chars_queue_t* cqueue_new( string_buffer_t* buffer ) {
 	return cqueue;
 }
 
+void cqueue_reinit( chars_queue_t* const cqueue, string_buffer_t* buffer ) {
+    cqueue-> buffer = buffer;
+    cqueue-> start = 0;
+}
+
 char cqueue_getc( chars_queue_t* const cqueue ) {
 	return cqueue-> buffer-> char_at[ cqueue-> start++ ];
 }
@@ -18,7 +23,7 @@ char cqueue_gettop( chars_queue_t* const cqueue) {
 	return cqueue-> buffer-> char_at[ cqueue-> start ];
 }
 
-char cqueue_push_back( chars_queue_t* const cqueue, char const sym ) {
+void cqueue_push_back( chars_queue_t* const cqueue, char const sym ) {
 	sbuffer_append_char( cqueue-> buffer, sym );
 }
 
