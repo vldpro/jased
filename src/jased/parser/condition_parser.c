@@ -1,5 +1,4 @@
 #include <string.h>
-#include <stdio.h>
 
 #include "jased/parser/errors.h"
 #include "jased/parser/terminals.h"
@@ -49,7 +48,17 @@ create_regex( chars_queue_t* cqueue, struct condition* const condition ) {
 	enum condition_type type = condition-> type;
 	regex_t reg; 
 
-	if ( !regcomp( &reg, regex_str, 0 ) ) return UNCORRECT_REGEX;
+
+	if ( regcomp(&reg, regex_str, 0) ) {
+
+        #ifdef DEBUG_PARSING
+        #include "jased/io/io.h" 
+        printerr("\t-dbg- error in string ");
+        printerr( regex_str );
+        printerr("\n");
+        #endif
+        return UNCORRECT_REGEX;
+    }
 
 	if ( type == REGEX ) {
 		condition-> regstart = reg;

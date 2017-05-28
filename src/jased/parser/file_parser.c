@@ -82,23 +82,11 @@ parse_file( int const file, interpreter_ctx_t* const int_ctx ) {
         return exit_stat;
     }
 
-    if ( int_ctx-> jased_ctx-> is_default_output_enable ) {
-        /* if default output enable, on each cycle sed print pattern space */
-        execlist_set(
-                int_ctx-> executors_list,
-                int_ctx-> jased_ctx-> commands_count++,
-                construct_no_params_executor(
-                    int_ctx-> jased_ctx, print_ps
-                )
-        );
-    }
-
-    /* each cycle sed clean pattern space */
     execlist_set(
         int_ctx-> executors_list,
         int_ctx-> jased_ctx-> commands_count++,
         construct_no_params_executor(
-            int_ctx-> jased_ctx, clear_ps 
+            int_ctx-> jased_ctx, empty_cmd 
         )
     );
 

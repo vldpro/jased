@@ -1,4 +1,13 @@
 #include "jased/runtime/executors.h"
+#include "jased/io/io.h"
+
+#include <unistd.h> 
+#include <errno.h> 
+#include <string.h> 
+
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #define EXECUTOR_INIT( args_, ctx_, run_, clean_ ) \
 	new_executor-> rt_ctx.args_for.any_args = args_; \
@@ -12,7 +21,9 @@ executor_t* construct_regexsub_executor(
 	regex_sub_cmd_t command,
 	regex_t const regex, 
 	string_buffer_t* const repl, 
-	int const flags 
+	int const flags,
+    int const match_num,
+    string_buffer_t* wfile
 ) {
 
 	struct regex_sub_args* args = 
@@ -22,6 +33,22 @@ executor_t* construct_regexsub_executor(
 	args-> regex = regex;
 	args-> replacement = repl;
 	args-> flags = flags;
+    args-> match_num = match_num;
+    if ( wfile != NULL ) {
+        args-> wfile = open( wfile-> char_at, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
+
+        if ( args-> wfile == -1 ) { 
+            int errnum = errno;
+            printerr("jased: can not open file '");
+            printerr( wfile-> char_at );
+            printerr("' ");
+            printerr( strerror(errnum) );
+            printerr("\n");
+            exit(4);
+        }
+
+        sbuffer_delete( wfile );
+    } else args-> wfile = -1;
 
 
 	new_executor-> command.run_regsub = command;

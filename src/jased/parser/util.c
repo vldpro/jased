@@ -1,7 +1,7 @@
 #include "jased/parser/util.h"
 
 #define IS_SPACE( sym ) \
-	sym == ' ' || sym == '\t'
+	sym == ' ' || sym == '\t' || sym == '\n'
 
 int skip_spaces( chars_queue_t* const cqueue ) {	
 	int i = 0;

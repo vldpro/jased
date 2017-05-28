@@ -47,7 +47,16 @@ int sub( string_buffer_t* const string_buffer, regex_t const regexp, string_buff
 */
 int gsub( string_buffer_t* const string_buffer, regex_t const regexp, string_buffer_t* const replacement_buffer, int const flags );
 
-
+/* 
+* \brief subtitute N(1-512) substring, which matched with regex
+* \param[out] string_buffer - contains string agter subtitution
+* \param[in] regexp - compiled regular expression
+* \param[in] replacement_buffer - string which replace matched substrings in string_buffer
+* \param[in] flags - substitution flags
+*
+* \return 0 - if least at one substring matched with regex, another <>0;
+*/
+int nsub( string_buffer_t* const string_buffer, regex_t const regexp, string_buffer_t* const replacement_buffer, int const flags );
 
 /**
 *	\brief if any characters in string equals with character of  to_transform_seq, they are replaced by approprite character from trasform_seq

@@ -21,6 +21,8 @@ struct regex_sub_args {
 	regex_t regex;
 	string_buffer_t* replacement;
 	int flags;
+    int match_num;
+    int wfile;
 };
 
 struct transform_args {
@@ -48,7 +50,7 @@ typedef struct runtime_ctx {
 
 typedef RT_ERR (*no_params_cmd_t) ( jased_ctx_t* const );
 typedef RT_ERR (*string_param_cmd_t) ( jased_ctx_t* const, string_buffer_t* const );
-typedef RT_ERR (*regex_sub_cmd_t) ( jased_ctx_t* const, regex_t const, string_buffer_t* const, int const );
+typedef RT_ERR (*regex_sub_cmd_t) ( jased_ctx_t* const, regex_t const, string_buffer_t* const, int const, int const, int const );
 typedef RT_ERR (*transform_cmd_t) ( jased_ctx_t* const, string_buffer_t* const, string_buffer_t* const );
 
 typedef union cmd_type {
@@ -81,7 +83,9 @@ executor_t* construct_regexsub_executor(
 	regex_sub_cmd_t command,
 	regex_t const regex, 
 	string_buffer_t* const repl, 
-	int const flags 
+	int const flags,
+    int const match_num,
+    string_buffer_t* wfile
 );
 
 executor_t* construct_transform_executor(

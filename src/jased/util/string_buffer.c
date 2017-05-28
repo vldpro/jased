@@ -35,7 +35,7 @@ int sbuffer_is_empty( string_buffer_t* const buffer ) {
 }
 
 void sbuffer_reinit( string_buffer_t* const buffer, char const* const string ) {
-	sbuffer_reinit_part( buffer, string, strlen( string ) - 1 );
+	sbuffer_reinit_part( buffer, string, strlen( string ) );
 }
 
 void sbuffer_reinit_part( string_buffer_t* const buffer, char const* const string, size_t const string_len ) {

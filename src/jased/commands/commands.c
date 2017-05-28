@@ -14,25 +14,77 @@ RT_ERR name( jased_ctx_t* const jased_ctx )
 RT_ERR name( jased_ctx_t* const jased_ctx, string_buffer_t* const str ) 
 
 #define DEFINE_REGSUB_CMD( name ) \
-RT_ERR name( jased_ctx_t* const jased_ctx, regex_t const regex, string_buffer_t* const str, int const flags ) 
+RT_ERR name( jased_ctx_t* const jased_ctx, \
+        regex_t const regex, \
+        string_buffer_t* const str, \
+        int const flags, int const match_num, int const wfile )
 
 #define DEFINE_TRANSFORM_CMD( name ) \
 RT_ERR name( jased_ctx_t* const jased_ctx, string_buffer_t* to_transform, string_buffer_t* transform_seq )
 
 DEFINE_REGSUB_CMD( subcmd ) {
-	sub( 
+	int matched = sub( 
 		jased_ctx-> pattern_space,
 		regex, str, flags
 	);
+
+    if ( matched ) {
+        if ( IS_FLAG_ENABLE(flags, P_FLAG) ) {
+            print_ps( jased_ctx );
+
+        } else if ( IS_FLAG_ENABLE(flags, PINIT_FLAG) ) {
+            print_line_ps( jased_ctx );
+        }
+
+        if ( IS_FLAG_ENABLE(flags, W_FLAG) ) {
+            print( wfile, jased_ctx-> pattern_space );
+        }
+    }
 
 	return 0;
 }
 
 DEFINE_REGSUB_CMD( gsubcmd ) {
-	gsub(
+	int matched = gsub(
 		jased_ctx-> pattern_space,
 		regex, str, flags
 	);
+
+    if ( matched ) {
+        if ( IS_FLAG_ENABLE(flags, P_FLAG) ) {
+            print_ps( jased_ctx );
+
+        } else if ( IS_FLAG_ENABLE(flags, PINIT_FLAG) ) {
+            print_line_ps( jased_ctx );
+
+        }
+
+        if ( IS_FLAG_ENABLE(flags, W_FLAG) ) {
+            print( wfile, jased_ctx-> pattern_space );
+        }
+    }
+
+	return 0;
+}
+
+DEFINE_REGSUB_CMD( nsubcmd ) {
+	int matched = nsub(
+		jased_ctx-> pattern_space,
+		regex, str, match_num 
+	);
+
+    if ( matched ) {
+        if ( IS_FLAG_ENABLE(flags, P_FLAG) ) {
+            print_ps( jased_ctx );
+
+        } else if ( IS_FLAG_ENABLE(flags, PINIT_FLAG) ) {
+            print_line_ps( jased_ctx );
+        }
+
+        if ( IS_FLAG_ENABLE(flags, W_FLAG) ) {
+            print( wfile, jased_ctx-> pattern_space );
+        }
+    }
 
 	return 0;
 }
@@ -45,6 +97,10 @@ DEFINE_TRANSFORM_CMD( transformcmd ) {
 	);	
 
 	return 0;
+}
+
+DEFINE_NO_PARAMS_CMD(empty_cmd) {
+    return 0;
 }
 
 DEFINE_ONE_STRING_PARAM_CMD( append ) {

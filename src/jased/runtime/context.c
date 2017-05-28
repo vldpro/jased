@@ -3,8 +3,6 @@
 
 jased_ctx_t* jased_ctx_new() {
 	jased_ctx_t* new_ctx = (jased_ctx_t*)malloc( sizeof(jased_ctx_t) );
-	new_ctx-> pattern_space = sbuffer_new();
-	new_ctx-> hold_space = sbuffer_new();
 	new_ctx-> io_buffer = io_buffer_new();
 	
 	new_ctx-> is_new_cycle_enable = 0;
@@ -16,8 +14,6 @@ jased_ctx_t* jased_ctx_new() {
 }
 
 void jased_ctx_delete( jased_ctx_t* ctx ) {
-	sbuffer_delete( ctx-> hold_space );
-	sbuffer_delete( ctx-> pattern_space );
 	io_buffer_delete( ctx-> io_buffer );
 	free(ctx);
 }

@@ -1,10 +1,11 @@
 #ifndef PARSER_CONTEXT
 #define PARSER_CONTEXT
 #include <stddef.h> 
+#include <jased/parser/condition_parser.h>
 
 typedef struct optional {
     /* condition for commands list */
-    struct condition* cond; 
+    struct condition cond; 
     /* pointer for inserting codition after commands list closed */
     size_t cond_command_pointer; 
     /* is condition present for this bracket*/

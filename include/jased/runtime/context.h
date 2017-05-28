@@ -25,6 +25,8 @@ typedef struct jased_ctx {
     /* count of parsed commands */
 	int commands_count;
 
+    string_buffer_t* sub_wfile;
+
 	io_buffer_t* io_buffer;
 } jased_ctx_t;
 

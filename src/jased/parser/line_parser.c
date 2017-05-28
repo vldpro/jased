@@ -113,10 +113,10 @@ parser_status_t parse_line(
         parser_ctx_t* const parser_ctx
 ) {
     optional_t condition;
-    condition.cond = malloc( sizeof(struct condition) );
-    condition.cond-> linestart = 0;
-    condition.cond-> lineend = 0;
-    condition.cond-> step = 0;
+    /*condition.cond = malloc( sizeof(struct condition) );*/
+    condition.cond.linestart = 0;
+    condition.cond.lineend = 0;
+    condition.cond.step = 0;
     condition.is_present = 0;
 
     while( !cqueue_is_empty(cqueue) ) {
@@ -127,8 +127,7 @@ parser_status_t parse_line(
         switch( sym ) {
             case CUSTOM_SEARCH_BEGIN: case DEFAULT_SEARCH_BEGIN: {
                 parser_status_t stat;
-		        if ( (stat = parse_condition(cqueue, condition.cond)) != PARSING_OK ) {
-                    free( condition.cond );
+		        if ( (stat = parse_condition(cqueue, &condition.cond)) != PARSING_OK ) {
 			        return stat;
                 }
 
@@ -140,7 +139,7 @@ parser_status_t parse_line(
                 parser_status_t stat;
                 /* parse num addr */
                 if ( sym >= '0' && sym <= '9' ) {
-				    if ( (stat = parse_condition(cqueue, condition.cond)) != PARSING_OK ) {
+				    if ( (stat = parse_condition(cqueue, &condition.cond)) != PARSING_OK ) {
                         return stat;
                     }
 
@@ -149,9 +148,10 @@ parser_status_t parse_line(
 
                 /* parse command */
                 if ( (stat = parse_command(cqueue, int_ctx, parser_ctx, condition)) != PARSING_OK ) {
-                    free( condition.cond );
 			        return stat;
                 }
+
+                /*free( condition.cond );*/
 
                 condition.is_present = 0;
                 break;
@@ -173,15 +173,13 @@ parser_status_t parse_line(
         }
     }
 
-    free( condition.cond );
-
     return PARSING_OK;
 }
 
 static executor_t* 
 construct_condition_executor( 
 	jased_ctx_t* const jased_ctx, 
-	struct condition const* const condition, 
+	struct condition const * const condition, 
 	int const if_false_cmd_ptr 
 ) {
 	enum condition_type condition_type = condition-> type;	
@@ -245,7 +243,7 @@ static void set_condition_if_present( optional_t condition, interpreter_ctx_t* c
         int_ctx-> jased_ctx-> commands_count,
         construct_condition_executor(
             int_ctx-> jased_ctx,
-            condition.cond,
+            &(condition.cond),
             int_ctx-> jased_ctx-> commands_count + 1
        )
     );
@@ -273,6 +271,7 @@ parse_command(
 
 	switch( sym ) {
 		case CMD_LIST_BEGIN: {
+            cqueue_getc(cqueue);
 			parser_ctx-> depth++;
 			if ( condition.is_present ) {
 				condition.cond_command_pointer = int_ctx-> jased_ctx-> commands_count++;
@@ -283,7 +282,8 @@ parse_command(
 			break;
 		}
 
-		case CMD_LIST_END: {
+		case CMD_LIST_END: { 
+            cqueue_getc(cqueue);
 			if ( parser_ctx-> depth != 0 ) {
 				optional_t opt = optstack_pop( parser_ctx-> cond_stack );
 
@@ -293,7 +293,7 @@ parse_command(
                         opt.cond_command_pointer,
 						construct_condition_executor( 
 							int_ctx-> jased_ctx, 
-							opt.cond, int_ctx-> jased_ctx-> commands_count 
+							&(opt.cond), int_ctx-> jased_ctx-> commands_count 
 						)
                     );
 				}
@@ -413,6 +413,68 @@ parse_translate( chars_queue_t* cqueue, interpreter_ctx_t* const int_ctx ) {
 	return UNTERMINATED_TRAN;
 }
 
+struct sub_args_result {
+    int flags;
+    int match_num; 
+    string_buffer_t* wfile;
+};
+
+static struct sub_args_result
+parse_sub_flags( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
+    struct sub_args_result res;
+
+    res.flags = 0;
+    res.match_num = 0;
+    res.wfile = NULL;
+
+    while ( !cqueue_is_empty(cqueue) ) {
+	    char sym = cqueue_gettop(cqueue);
+
+        switch (sym) {
+            case 'g' : { cqueue_getc(cqueue); res.flags |= G_FLAG; break; }
+            case 'p' : { cqueue_getc(cqueue); res.flags |= P_FLAG; break; }
+            case 'P' : { cqueue_getc(cqueue); res.flags |= PINIT_FLAG; break; }
+            case 'w' : { 
+                chars_queue_t* wfile = cqueue_new( sbuffer_new() );
+
+                res.flags |= W_FLAG;
+                cqueue_getc(cqueue); 
+                skip_spaces(cqueue);
+
+                while ( !cqueue_is_empty(cqueue) ) {
+                    char ch = cqueue_gettop(cqueue);
+                    if ( ch != CMD_DELIM ) {
+                        cqueue_push_back( wfile, cqueue_getc(cqueue) );
+                    }
+                }
+
+                res.wfile = sbuffer_truncate(wfile-> buffer);
+                cqueue_delete(wfile);
+                return res;
+            }
+
+            default: {
+                if ( sym >= '0' && sym <= '9' ) {
+                    res.flags |= N_FLAG;
+
+                    while ( !cqueue_is_empty(cqueue) ) {
+                        char const ch = cqueue_gettop(cqueue);
+                        if ( ch < '0' || ch > '9' ) break;
+                        res.match_num = res.match_num * 10 + (ch - '0');
+                        cqueue_getc(cqueue);
+                    }
+                    
+                    break;
+                }
+
+                return res;
+            }
+        }
+    }
+
+    return res;
+}
+
 static parser_status_t
 parse_sub( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
 	char SUB_DELIMITER;
@@ -430,18 +492,46 @@ parse_sub( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
 		if ( cur_char == SUB_DELIMITER && bs_count % 2 == 0 ) {
 			if ( ++delim_count == 3 ) {
 				char* regex_str = sbuffer_truncate( regex-> buffer )-> char_at;
+                struct sub_args_result res;
 				regex_t reg;	
 
 				if ( regcomp(&reg, regex_str, 0) ) return UNCORRECT_REGEX;
 
-				execlist_set( 
-					int_ctx-> executors_list, 
-					int_ctx-> jased_ctx-> commands_count++,
-					construct_regexsub_executor(
-						int_ctx-> jased_ctx,
-						subcmd, reg, replacement-> buffer, 0
-					)
-				);
+                res = parse_sub_flags( cqueue, int_ctx );
+
+                if ( IS_FLAG_ENABLE(res.flags, G_FLAG) ) {
+                    execlist_set( 
+					    int_ctx-> executors_list, 
+					    int_ctx-> jased_ctx-> commands_count++,
+					    construct_regexsub_executor(
+						    int_ctx-> jased_ctx,
+						    gsubcmd, reg, replacement-> buffer, 
+                            res.flags, 0, res.wfile 
+					    )
+				    );
+
+                } else if ( IS_FLAG_ENABLE(res.flags, N_FLAG) ) {
+                    execlist_set( 
+					    int_ctx-> executors_list, 
+					    int_ctx-> jased_ctx-> commands_count++,
+				    	construct_regexsub_executor(
+				    		int_ctx-> jased_ctx,
+				    		nsubcmd, reg, replacement-> buffer,
+                            res.flags, res.match_num, res.wfile 
+					    )
+				    );
+
+                } else {
+				    execlist_set( 
+					    int_ctx-> executors_list, 
+					    int_ctx-> jased_ctx-> commands_count++,
+					    construct_regexsub_executor(
+						    int_ctx-> jased_ctx,
+						    subcmd, reg, replacement-> buffer,
+                            res.flags, 0, res.wfile 
+					    )
+				    );
+                }
 
 				cqueue_delete( regex );
 				cqueue_delete( replacement);

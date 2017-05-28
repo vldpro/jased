@@ -1,7 +1,12 @@
 #include <stddef.h>
 #include <malloc.h>
+#include <string.h>
 
 #include "jased/runtime/executors.h"
+
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 /* 	
 	Executors - abstract objects which contains jased commands with their arguments.
@@ -79,7 +84,9 @@ DEFINE_RUNNER( exec_regex_sub ) {
 		executor-> rt_ctx.jased_ctx,
 		regsub_args-> regex,
 		regsub_args-> replacement,
-		regsub_args-> flags
+		regsub_args-> flags,
+        regsub_args-> match_num,
+        regsub_args-> wfile
 	);
 }
 
@@ -87,12 +94,13 @@ DEFINE_CLEANER( clean_regex_sub ) {
 	struct regex_sub_args* const regsub_args = executor-> rt_ctx.args_for.reg_sub;
 
 	/*regfree( regsub_args-> regex );	*/
+    if ( regsub_args-> wfile != -1 ) close( regsub_args-> wfile ); 
 	sbuffer_delete( regsub_args-> replacement );	
 	free( regsub_args );
 	free( executor );
 }
 
-/* CONDITIONS */
+/* CONDITIONS executors */
 
 condition_args_t* condition_args_new() {
 	return (condition_args_t*)malloc( sizeof(condition_args_t) );

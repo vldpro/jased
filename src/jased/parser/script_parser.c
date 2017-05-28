@@ -19,8 +19,8 @@
 #endif
 
 static void delete( chars_queue_t* cqueue, parser_ctx_t* parser_ctx, string_buffer_t* sbuffer ) {
-    sbuffer_delete( sbuffer );
     cqueue_delete( cqueue );
+    sbuffer_delete( sbuffer );
     parser_ctx_delete( parser_ctx );
 }
 
@@ -56,7 +56,7 @@ parse_commandline_script( char* const script, interpreter_ctx_t* const int_ctx )
         exit_stat.is_ok = 0;
         exit_stat.stop_on_line = 1;
         exit_stat.stop_on_symbol = cqueue-> start;
-        exit_stat.parser_status = stat;
+        exit_stat.parser_status = stat == PARSING_OK ? UNCLOSED_CMD_LIST : stat;
 
         #ifdef DEBUG_PARSING
         debug_parsing("FAILED", int_ctx ); 
@@ -66,23 +66,11 @@ parse_commandline_script( char* const script, interpreter_ctx_t* const int_ctx )
         return exit_stat; 
     }
 
-    if ( int_ctx-> jased_ctx-> is_default_output_enable ) {
-        /* if default output enable, on each cycle sed print pattern space */
-        execlist_set(
-                int_ctx-> executors_list,
-                int_ctx-> jased_ctx-> commands_count++,
-                construct_no_params_executor(
-                    int_ctx-> jased_ctx, print_ps
-                )
-        );
-    }
-
-    /* each cycle sed clean pattern space */
     execlist_set(
         int_ctx-> executors_list,
         int_ctx-> jased_ctx-> commands_count++,
         construct_no_params_executor(
-            int_ctx-> jased_ctx, clear_ps 
+            int_ctx-> jased_ctx, empty_cmd 
         )
     );
 

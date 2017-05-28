@@ -2,14 +2,13 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <string.h>
-#include <stdio.h>
 
 #include <jased/commands/regex.h>
 
 #define REVERSE_LINK_LEN 2
 
 int match( char const* const string, regex_t const regexp ){
-	return regexec( &regexp, string, 0, NULL, 0);
+	return !regexec( &regexp, string, 0, NULL, 0);
 }
 
 static int insert_subexpr_matches( regmatch_t* const matches, char const* const string, string_buffer_t* const replacement_buffer ) {
@@ -61,7 +60,7 @@ int sub( string_buffer_t* const string_buffer, regex_t const regexp, string_buff
 	size_t last_part_length = 0;
 	char* last_part;
 
-	if ( result ) return NO_MATCHES;
+	if ( result ) return 0;
 
 	last_part_length = string_buffer-> eos - matches[0].rm_eo;
 	last_part = malloc( (last_part_length + 1) * sizeof(char) );
@@ -92,13 +91,16 @@ int sub( string_buffer_t* const string_buffer, regex_t const regexp, string_buff
 
 	free( last_part );
 
-	return MATCH;
+	return 1;
 }
+
+#include "jased/io/io.h"
+#include "stdio.h"
 
 int gsub( string_buffer_t* const string_buffer, regex_t const regexp, string_buffer_t* const replacement_buffer, int const flags ) {
 	char* const string = malloc( (string_buffer-> eos + 1) * sizeof(char) );
 	string_buffer_t* original_replacement = sbuffer_clone( replacement_buffer );
-	size_t i = 0, j = 0;
+	size_t i = 0, j = 0, matched = 0;
 	size_t const str_len = string_buffer-> eos;
 
 	strcpy( string, string_buffer-> char_at );
@@ -109,8 +111,8 @@ int gsub( string_buffer_t* const string_buffer, regex_t const regexp, string_buf
 
 		if ( result ) {
 			free( string );
-			return result;
-		}
+			return matched;
+		} else matched = 1;
 
 		insert_subexpr_matches( 
 			matches, 
@@ -137,6 +139,54 @@ int gsub( string_buffer_t* const string_buffer, regex_t const regexp, string_buf
 	}
 }
 
+
+int nsub( string_buffer_t* const string_buffer, regex_t const regexp, string_buffer_t* const replacement_buffer, int const num ) {
+    char* const string = malloc( (string_buffer-> eos + 1) * sizeof(char) );
+	string_buffer_t* original_replacement = sbuffer_clone( replacement_buffer );
+    /* i - offset (each iteration i points to the end of last match), n - count of matches */
+	size_t i = 0, j = 0, matched = 0, n = 0;
+	size_t const str_len = string_buffer-> eos;
+
+	strcpy( string, string_buffer-> char_at );
+
+	for ( ; ; ) {
+		regmatch_t matches[10];
+		int result = regexec( &regexp, string_buffer-> char_at + i, 10, matches, 0 );
+
+		if ( result ) {
+			free( string );
+			return matched;
+		} else matched = 1;
+
+        if ( ++n == num ) {
+		    insert_subexpr_matches( 
+			    matches, 
+			    string_buffer-> char_at + i,
+			    replacement_buffer
+		    );
+
+		    sbuffer_set_end_of_string( string_buffer, i + matches[0].rm_so );
+
+		    sbuffer_append_buf(
+			    string_buffer, replacement_buffer
+		    );
+
+		    sbuffer_append(
+			    string_buffer,
+			    string + j + matches[0].rm_eo,
+			    str_len - j - matches[0].rm_eo
+		    );
+
+		    i += matches[0].rm_so + replacement_buffer-> eos;
+        }
+
+        i += matches[0].rm_eo;
+		j += matches[0].rm_eo;
+
+		sbuffer_reinit( replacement_buffer, original_replacement-> char_at );
+	}
+}
+
 int transform( char* const string, char const* const to_transform_seq, char const* const transform_seq) {
 	size_t i = 0;
 	size_t string_len = strlen( string );
@@ -153,24 +203,3 @@ int transform( char* const string, char const* const to_transform_seq, char cons
 
 	return 0;
 }
-
-/*int main( int argc, char** argv ) {
-	char buf[100];
-	size_t count = read(STDIN_FILENO, &buf, 99);
-	string_buffer_t* string;
-	string_buffer_t* replacement;
-
-	regex_t regexp;
-
-	buf[count - 1] = '\0';
-
-	regcomp( &regexp, "\\(a\\)b\\(a\\)", 0 );
-
-	string = sbuffer_init( buf );
-	replacement = sbuffer_init( "\\1\\2" );
-
-	gsub( string, regexp, replacement, 0 );
-	puts( string-> char_at);
-
-	return 0;
-}*/
