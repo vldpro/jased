@@ -113,15 +113,17 @@ int main( int argc, char** argv ) {
     /* run all parsed scripts on all source files */
     for ( i = 0; i < cmdline_ctx-> source_files_count; i++ ) {
         int source_file = open( cmdline_ctx-> source_filenames[i], O_RDONLY );
-        size_t j = 0;
 
         CHECK_OPEN( source_file, cmdline_ctx-> source_filenames[i] );
 
-        for ( ; j < total_scripts_count; j++ ) {
-            run( int_contexts[j] ); 
-        }
+        run( source_file, int_contexts, total_scripts_count ); 
 
         close( source_file );
+    }
+
+    /* if no source files, read stdin */
+    if ( i == 0 ) {
+        run( STDIN_FILENO, int_contexts, total_scripts_count );
     }
 
     delete( cmdline_ctx, int_contexts, total_scripts_count );
