@@ -6,7 +6,8 @@ enum jased_exit_status {
     ERROR_IN_OPEN_FILES,
     ERROR_IN_PARSING,
     ERROR_IO,
-    ERROR_OOM
+    ERROR_OOM,
+    ERROR_RUNTIME
 };
 
 #endif

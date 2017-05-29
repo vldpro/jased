@@ -32,6 +32,7 @@ DEFINE_REGSUB_CMD( subcmd ) {
 	);
 
     if ( matched ) {
+        jased_ctx-> is_any_subs_matched = 1;
         if ( IS_FLAG_ENABLE(flags, P_FLAG) ) {
             print_ps( jased_ctx );
 
@@ -54,6 +55,7 @@ DEFINE_REGSUB_CMD( gsubcmd ) {
 	);
 
     if ( matched ) {
+        jased_ctx-> is_any_subs_matched = 1;
         if ( IS_FLAG_ENABLE(flags, P_FLAG) ) {
             print_ps( jased_ctx );
 
@@ -77,6 +79,7 @@ DEFINE_REGSUB_CMD( nsubcmd ) {
 	);
 
     if ( matched ) {
+        jased_ctx-> is_any_subs_matched = 1;
         if ( IS_FLAG_ENABLE(flags, P_FLAG) ) {
             print_ps( jased_ctx );
 
@@ -144,7 +147,50 @@ DEFINE_ONE_STRING_PARAM_CMD( read_file ) {
     return 0; 
 }
 
-DEFINE_ONE_STRING_PARAM_CMD( branch ) { return 0; }
+DEFINE_ONE_STRING_PARAM_CMD( branch ) { 
+    int command = hmap_get( jased_ctx-> labels, str-> char_at );
+
+    if ( str-> eos == 0 ) {
+        jased_ctx-> command_pointer = jased_ctx-> commands_count - 2;
+        return 0;
+    }
+
+    if ( command == HMAP_UNDEFINED ) {
+        printerr("jased: undefined label '");
+        printerr( str-> char_at );
+        printerr("'\n");
+        return UNDEFINED_LABEL_FOR_BRANCH;
+    }
+
+    jased_ctx-> command_pointer = command - 1;
+
+    return 0; 
+}
+
+
+DEFINE_ONE_STRING_PARAM_CMD( test ) { 
+    int command;
+
+    if ( str-> eos == 0 ) {
+        jased_ctx-> command_pointer = jased_ctx-> commands_count - 2;
+        return 0;
+    }
+    
+    if ( jased_ctx-> is_any_subs_matched == 0 ) return 0;
+
+    command = hmap_get( jased_ctx-> labels, str-> char_at );
+
+    if ( command == HMAP_UNDEFINED ) {
+        printerr("jased: undefined label '");
+        printerr( str-> char_at );
+        printerr("'\n");
+        return UNDEFINED_LABEL_FOR_BRANCH;
+    }
+
+    jased_ctx-> command_pointer = command - 1;
+
+    return 0;
+}
 
 /* i command */
 DEFINE_ONE_STRING_PARAM_CMD( insert ) {
@@ -227,22 +273,21 @@ DEFINE_NO_PARAMS_CMD( next_append ) {
 		buf
 	);
 
-	if ( res == -1 ) return 1;
+	if ( res == -1 ) return quit(jased_ctx);
 
 	sbuffer_append_buf(
-		buf, jased_ctx-> pattern_space
+		jased_ctx-> pattern_space, buf
 	);
 
-	sbuffer_delete( jased_ctx-> pattern_space );
-
-	jased_ctx-> pattern_space = buf;	
+    jased_ctx-> current_line++;
 
 	return 0;
 }
 
 /* = command */
 DEFINE_NO_PARAMS_CMD( print_linenum ) {
-	/* print(  jased_ctx-> out_stream, jased_ctx-> current_line ); */
+    print_int( jased_ctx-> out_stream, jased_ctx-> current_line );
+    print_stream( jased_ctx-> out_stream, "\n");
 	return 0;
 }
 
@@ -261,15 +306,16 @@ DEFINE_NO_PARAMS_CMD( print_line_ps ) {
 		if ( buf[i] == '\n' ) break;
 	}
 
-	write( jased_ctx-> out_stream, buf, i );
+	write( jased_ctx-> out_stream, buf, i + 1 );
 	return 0;
 }
 
 /* g command */
 DEFINE_NO_PARAMS_CMD( copy_hs_to_ps ) {
+    printerr("here\n");
 	sbuffer_reinit( 
 		jased_ctx-> pattern_space, 
-		jased_ctx-> hold_space-> char_at 
+		jased_ctx-> hold_space-> char_at
 	);	
 
 	return 0;
@@ -286,15 +332,18 @@ DEFINE_NO_PARAMS_CMD( append_hs_to_ps ) {
 	return 0;
 }
 
+/* h command */
 DEFINE_NO_PARAMS_CMD( copy_ps_to_hs ) {
-	sbuffer_reinit( 
-		jased_ctx-> hold_space, 
-		jased_ctx-> pattern_space-> char_at 
+    sbuffer_clear( jased_ctx-> pattern_space );
+	sbuffer_append_buf( 
+		jased_ctx-> hold_space,
+		jased_ctx-> pattern_space
 	);
 
 	return 0;
 }
 
+/* H command */
 DEFINE_NO_PARAMS_CMD( append_ps_to_hs ) {
 	sbuffer_append_buf( 
 		jased_ctx-> hold_space, 

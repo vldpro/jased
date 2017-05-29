@@ -43,7 +43,7 @@ void sbuffer_reinit( string_buffer_t* const buffer, char const* const string ) {
 }
 
 void sbuffer_reinit_part( string_buffer_t* const buffer, char const* const string, size_t const string_len ) {
-	if ( buffer-> eos + string_len + 1 > buffer-> size ) {
+	if ( string_len > buffer-> size ) {
 		on_overflow( buffer, string_len );
 	}
 
@@ -56,6 +56,7 @@ static void on_overflow( string_buffer_t* const buffer, size_t const needed_to_a
     char* tmp = (char*)realloc( buffer-> char_at, needed * DEFAULT_BUFFER_SIZE * sizeof(char) );
 
     if ( tmp != NULL ) {
+        buffer-> size = needed * DEFAULT_BUFFER_SIZE;
         buffer-> char_at = tmp;
     } else {
         printerr("jased: out of memory.\n");

@@ -28,6 +28,7 @@ typedef enum terminal_char {
 	CMD_APPEND = 'a',
 	CMD_CHANGE = 'c',
 	CMD_BRANCH = 'b',
+    CMD_TEST = 't',
 
 	CMD_DELETE_PS = 'd',
 	CMD_DELETE_INIT_PS = 'D',

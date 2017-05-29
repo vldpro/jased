@@ -3,6 +3,7 @@
 #include "jased/runtime/interpreter.h"
 #include "jased/runtime/context.h"
 #include "jased/commands/commands.h"
+#include "jased/jased_exit_status.h"
 #include "jased/io/io.h"
 
 interpreter_ctx_t* interpreter_ctx_new() {
@@ -38,6 +39,7 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
     for ( j = 0; j < contexts_count; j++ ) {
         int_contexts[j]-> jased_ctx-> in_stream = in_stream;
         int_contexts[j]-> jased_ctx-> out_stream = STDOUT_FILENO;
+        int_contexts[j]-> jased_ctx-> io_buffer = iobuf;
 
         int_contexts[j]-> jased_ctx-> hold_space = hold_space;
         int_contexts[j]-> jased_ctx-> pattern_space = pattern_space;
@@ -60,6 +62,7 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
 
 			    jased_ctx-> command_pointer = 0;
 			    jased_ctx-> is_new_cycle_enable = 0;
+			    jased_ctx-> is_any_subs_matched = 0;
 
                 while ( (i = jased_ctx-> command_pointer) < jased_ctx-> commands_count ) {
 			    	int command_exval;
@@ -76,15 +79,17 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
 			    	);
 
     				if ( command_exval != 0 ) {
+                        if ( command_exval == UNDEFINED_LABEL_FOR_BRANCH ) {
+                            printerr("jased: undefined label for branch.\n");
+                            exit(ERROR_RUNTIME);
+                        }
+
                         delete( iobuf, pattern_space, hold_space );
 					    return;
 				    }
 
 				    jased_ctx-> command_pointer++;
 			    }
-
-                
-
             }
 
             /* if default output enable, on each cycle sed print pattern space */

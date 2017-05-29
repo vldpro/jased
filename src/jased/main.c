@@ -89,7 +89,7 @@ int main( int argc, char** argv ) {
 
         if ( !is_parsing_ok(parse_file(file, int_contexts[i])) ) {
             delete( cmdline_ctx, int_contexts, total_scripts_count );
-            close( file );
+            close_file( file );
             return ERROR_IN_PARSING;
         }
 

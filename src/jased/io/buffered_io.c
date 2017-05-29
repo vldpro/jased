@@ -115,7 +115,7 @@ static ssize_t println_stream( int const stream, char const * const str ) {
     return 0;
 }
 
-static ssize_t print_stream( int const stream, char const * const str ) {
+ssize_t print_stream( int const stream, char const * const str ) {
     WRITE( stream, str, strlen(str) );
     return 0;
 }

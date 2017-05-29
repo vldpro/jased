@@ -20,6 +20,10 @@ static parser_status_t cmd( chars_queue_t* const cqueue, interpreter_ctx_t* cons
 static parser_status_t 
 parse_translate( chars_queue_t* cqueue, interpreter_ctx_t* const int_ctx );
 
+
+static parser_status_t 
+parse_test( chars_queue_t* cqueue, interpreter_ctx_t* const int_ctx );
+
 static parser_status_t 
 parse_sub( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx );
 
@@ -349,6 +353,8 @@ parse_command(
 
 		case CMD_QUIT: 				{ set_condition_if_present( condition, int_ctx ); DELEGATE_PARSING_TO_FUNCTION( parse_quit ); }
 
+		case CMD_TEST: 				{ set_condition_if_present( condition, int_ctx ); DELEGATE_PARSING_TO_FUNCTION( parse_test ); }
+
 		default: {	
             if ( cqueue_is_empty(cqueue) ) return PARSING_OK;
 			return ILLEGAL_CHARACTER;
@@ -373,6 +379,9 @@ parse_translate( chars_queue_t* cqueue, interpreter_ctx_t* const int_ctx ) {
 	chars_queue_t* transform_seq = cqueue_new( sbuffer_new() );
 
 	TRY_GETCHAR( TRANSLATE_DELIMITER, UNTERMINATED_TRAN );
+
+    if ( TRANSLATE_DELIMITER == '\\' || TRANSLATE_DELIMITER == '\n' ) 
+        return UNCORRECT_TRANSLATE_DELIMITER;
 
 	while( !cqueue_is_empty(cqueue) ) {
 		char const cur_char = cqueue_getc(cqueue);
@@ -416,7 +425,7 @@ parse_translate( chars_queue_t* cqueue, interpreter_ctx_t* const int_ctx ) {
 
 struct sub_args_result {
     int flags;
-    int match_num; 
+    int match_num;
     string_buffer_t* wfile;
 };
 
@@ -486,6 +495,8 @@ parse_sub( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
 	chars_queue_t* replacement = cqueue_new( sbuffer_new() );
 
 	TRY_GETCHAR( SUB_DELIMITER, UNTERMINATED_SUB );
+
+    if ( SUB_DELIMITER == '\\' || SUB_DELIMITER == '\n' ) return UNCORRECT_SUB_DELIMITER;
 
 	while( !cqueue_is_empty(cqueue) ) {
 		char const cur_char = cqueue_getc(cqueue);
@@ -661,16 +672,46 @@ parse_insert( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
 
 }
 
-static parser_status_t
-parse_branch( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
-	int res = skip_spaces(cqueue);
-	if ( res == -1 ) return PARSING_OK;
 
-	while ( 
-		!cqueue_is_empty(cqueue) || (cqueue_getc(cqueue) == CMD_DELIM) 
-	) {}
+
+static parser_status_t
+parse_one_param_str( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx, string_param_cmd_t cmd ) {
+    chars_queue_t* label = cqueue_new( sbuffer_new() );
+    skip_spaces( cqueue );
+
+    while( !cqueue_is_empty(cqueue) ) {
+        char const sym = cqueue_gettop(cqueue);
+
+        if ( sym == CMD_DELIM || sym == CMD_DELIM_NEWLINE || sym == '\t' || sym == ' ' ) break;
+
+        cqueue_push_back( label, cqueue_getc(cqueue) );
+    }
+
+    sbuffer_truncate( label-> buffer );
+
+    execlist_set(
+		int_ctx-> executors_list,
+		int_ctx-> jased_ctx-> commands_count++, 
+		construct_one_param_str_executor(
+			int_ctx-> jased_ctx, cmd, 
+            label-> buffer
+		)
+	);
+
+    cqueue_delete(label);
 
 	return PARSING_OK;
+}
+    
+
+static parser_status_t
+parse_test( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
+   return parse_one_param_str( cqueue, int_ctx, test ); 
+}
+
+static parser_status_t
+parse_branch( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
+   return parse_one_param_str( cqueue, int_ctx, branch ); 
 }
 
 static parser_status_t
@@ -681,7 +722,7 @@ parse_read( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
     while( !cqueue_is_empty(cqueue) ) {
         char const sym = cqueue_gettop(cqueue);
 
-        if ( sym == CMD_DELIM ) break;
+        if ( sym == CMD_DELIM || sym == CMD_DELIM_NEWLINE || sym == '\t' || sym == ' ' ) break;
 
         cqueue_push_back( filename, cqueue_getc(cqueue) );
     }
@@ -709,7 +750,7 @@ parse_write( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
     while( !cqueue_is_empty(cqueue) ) {
         char const sym = cqueue_gettop(cqueue);
 
-        if ( sym == CMD_DELIM ) break;
+        if ( sym == CMD_DELIM || sym == CMD_DELIM_NEWLINE || sym == '\t' || sym == ' ' ) break;
 
         cqueue_push_back( filename, cqueue_getc(cqueue) );
     }
@@ -730,6 +771,29 @@ parse_write( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
 
 static parser_status_t
 parse_label( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
+    chars_queue_t* label = cqueue_new( sbuffer_new() );
+    skip_spaces( cqueue );
+
+    while( !cqueue_is_empty(cqueue) ) {
+        char const sym = cqueue_gettop(cqueue);
+
+        if ( sym == CMD_DELIM || sym == CMD_DELIM_NEWLINE || sym == '\t' || sym == ' ' ) break;
+
+        cqueue_push_back( label, cqueue_getc(cqueue) );
+    }
+
+    sbuffer_truncate( label-> buffer );
+
+    if ( label-> buffer-> eos == 0 ) return EMPTY_LABEL;
+
+    if ( hmap_add(int_ctx->jased_ctx-> labels, label-> buffer-> char_at, int_ctx-> jased_ctx-> commands_count) ) {
+        int val = hmap_get( int_ctx-> jased_ctx-> labels, label-> buffer-> char_at );
+
+        if ( val < 0 ) {
+            hmap_set(int_ctx-> jased_ctx-> labels, label-> buffer-> char_at, int_ctx-> jased_ctx-> commands_count);
+        } else return LABEL_DOUBLE_DEFINITION;
+    }
+
 	return PARSING_OK;
 }
 
@@ -807,7 +871,7 @@ DEFINE_PARSE_NOARGS_COMMAND(parse_println) {
 /* q */
 DEFINE_PARSE_NOARGS_COMMAND(parse_quit) {
 	/* TODO */
-	push_noargs_command( print_line_ps, int_ctx );		
+	push_noargs_command( quit, int_ctx );		
 	return PARSING_OK;
 }
 

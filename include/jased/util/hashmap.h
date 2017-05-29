@@ -3,6 +3,7 @@
 
 #define HMAP_ELEMENT_IS_PRESENT 1
 #define HMAP_SUCCESS 0
+#define HMAP_UNDEFINED -200
 
 typedef struct hashmap_t hashmap_t;
 typedef int (*hash_function_t) (char*);

@@ -15,6 +15,8 @@ ssize_t print( int const stream, string_buffer_t* const string );
 
 ssize_t println( char const* const str );
 
+ssize_t print_stream( int const stream, char const* const string );
+
 ssize_t printerr( char const* const str );
 
 ssize_t print_int( int const stream, int const value );

@@ -117,6 +117,9 @@ parse_cond_expr( chars_queue_t* const cqueue, struct condition* const condition 
 			cqueue_getc(cqueue);
 			TRY_GETCHAR( custom_start_char, END_OF_LINE );
 
+            if ( custom_start_char == '\\' || custom_start_char == '\n' ) 
+                return UNCORRECT_SEARCH_DELIMITER;
+
 			return parse_search( cqueue, custom_start_char, condition );
 		}
 

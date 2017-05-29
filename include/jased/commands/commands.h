@@ -17,6 +17,7 @@ typedef enum sub_flags {
 
 #define IS_FLAG_ENABLE( src, flag ) ((src) & (flag)) != 0
 
+#define UNDEFINED_LABEL_FOR_BRANCH 2
 
 #define DECLARE_NO_PARAMS_CMD( name ) \
 int name( jased_ctx_t* const jased_ctx )
@@ -49,6 +50,7 @@ DECLARE_ONE_STRING_PARAM_CMD( insert );
 DECLARE_ONE_STRING_PARAM_CMD( change );
 DECLARE_ONE_STRING_PARAM_CMD( read_file );
 DECLARE_ONE_STRING_PARAM_CMD( branch );
+DECLARE_ONE_STRING_PARAM_CMD( test );
 
 DECLARE_ONE_INT_PARAM_CMD( write_file );
 
@@ -65,5 +67,6 @@ DECLARE_NO_PARAMS_CMD( append_hs_to_ps );
 DECLARE_NO_PARAMS_CMD( copy_ps_to_hs );
 DECLARE_NO_PARAMS_CMD( append_ps_to_hs );
 DECLARE_NO_PARAMS_CMD( exchange_ps_and_hs );
+DECLARE_NO_PARAMS_CMD( quit );
 
 #endif
