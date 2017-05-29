@@ -1,6 +1,8 @@
-#include "jased/runtime/executors_list.h"
 #include <malloc.h>
-#include <jased/io/io.h>
+
+#include "jased/runtime/executors_list.h"
+#include "jased/io/io.h"
+#include "jased/jased_exit_status.h"
 
 executors_list_t* execlist_new() {
 	executors_list_t* execlist = (executors_list_t*)malloc( sizeof(executors_list_t) );
@@ -36,7 +38,7 @@ static void on_overflow( executors_list_t* const execlist ) {
         execlist-> executors = tmp;
     } else {
         printerr("jased: out of memory.\n");
-        exit(4);
+        exit(ERROR_OOM);
     }
 }
 

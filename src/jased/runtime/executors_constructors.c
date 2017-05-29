@@ -124,6 +124,29 @@ executor_t* construct_one_param_str_executor(
 	return new_executor;
 }
 
+executor_t* construct_io_executor( 
+	jased_ctx_t* const jased_ctx, 
+	int_param_cmd_t command,
+	string_buffer_t* const filename
+) {
+	struct int_param_args* args = 
+		(struct int_param_args*)malloc( sizeof(struct int_param_args) );	
+	executor_t* new_executor = executor_new();
+
+	args-> int_value = open_filem( filename-> char_at, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
+    sbuffer_delete(filename);
+
+	new_executor-> command.run_int_arg = command;
+
+	EXECUTOR_INIT(
+		args, jased_ctx,
+		exec_one_param_int, 
+		clean_one_param_int
+	);
+
+	return new_executor;
+}
+
 executor_t* construct_line_condition(
 	jased_ctx_t* const jased_ctx,
 	int const line_num,

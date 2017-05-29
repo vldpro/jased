@@ -13,6 +13,9 @@ RT_ERR name( jased_ctx_t* const jased_ctx )
 #define DEFINE_ONE_STRING_PARAM_CMD( name ) \
 RT_ERR name( jased_ctx_t* const jased_ctx, string_buffer_t* const str ) 
 
+#define DEFINE_ONE_INT_PARAM_CMD( name ) \
+RT_ERR name( jased_ctx_t* const jased_ctx, int const val ) 
+
 #define DEFINE_REGSUB_CMD( name ) \
 RT_ERR name( jased_ctx_t* const jased_ctx, \
         regex_t const regex, \
@@ -115,10 +118,31 @@ DEFINE_ONE_STRING_PARAM_CMD( append ) {
 }
 
 /* w command */
-DEFINE_ONE_STRING_PARAM_CMD( write_file ) { return 0; }
+DEFINE_ONE_INT_PARAM_CMD( write_file ) { 
+    print( val, jased_ctx-> pattern_space );
+    return 0; 
+}
 
 /* r command */
-DEFINE_ONE_STRING_PARAM_CMD( read_file ) { return 0; }
+DEFINE_ONE_STRING_PARAM_CMD( read_file ) { 
+    int fd = open( str-> char_at, O_RDONLY );
+    string_buffer_t* line;
+    io_buffer_t* iobuf;
+
+    if ( fd == -1 ) return 0;
+
+    line = sbuffer_new();
+    iobuf = io_buffer_new();
+
+    while ( readln(fd, iobuf, line) != -1 ) {
+        print( jased_ctx-> out_stream, line ); 
+    }
+
+    sbuffer_delete( line );
+    io_buffer_delete( iobuf );
+
+    return 0; 
+}
 
 DEFINE_ONE_STRING_PARAM_CMD( branch ) { return 0; }
 

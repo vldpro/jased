@@ -85,8 +85,7 @@ int main( int argc, char** argv ) {
 
     /* parse script files */
     for ( i = 0; i < cmdline_ctx-> script_files_count; i++ ) {
-        int file = open( cmdline_ctx-> script_filenames[i], O_RDONLY );
-        CHECK_OPEN( file, cmdline_ctx-> script_filenames[i] );
+        int file = open_file( cmdline_ctx-> script_filenames[i], O_RDONLY );
 
         if ( !is_parsing_ok(parse_file(file, int_contexts[i])) ) {
             delete( cmdline_ctx, int_contexts, total_scripts_count );
@@ -94,7 +93,7 @@ int main( int argc, char** argv ) {
             return ERROR_IN_PARSING;
         }
 
-        close( file );
+        close_file( file );
     }
 
     /* parse commandline scripts */
@@ -112,13 +111,11 @@ int main( int argc, char** argv ) {
 
     /* run all parsed scripts on all source files */
     for ( i = 0; i < cmdline_ctx-> source_files_count; i++ ) {
-        int source_file = open( cmdline_ctx-> source_filenames[i], O_RDONLY );
-
-        CHECK_OPEN( source_file, cmdline_ctx-> source_filenames[i] );
+        int source_file = open_file( cmdline_ctx-> source_filenames[i], O_RDONLY );
 
         run( source_file, int_contexts, total_scripts_count ); 
 
-        close( source_file );
+        close_file( source_file );
     }
 
     /* if no source files, read stdin */

@@ -1,7 +1,10 @@
 #include <malloc.h>
 #include <string.h>
+
 #include "jased/util/string_buffer.h"
+#include "jased/jased_exit_status.h"
 #include "jased/io/io.h"
+
 
 #define DEFAULT_BUFFER_SIZE 1024
 
@@ -56,7 +59,7 @@ static void on_overflow( string_buffer_t* const buffer, size_t const needed_to_a
         buffer-> char_at = tmp;
     } else {
         printerr("jased: out of memory.\n");
-        exit(5);
+        exit(ERROR_OOM);
     }
 }
 

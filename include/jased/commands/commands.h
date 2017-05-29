@@ -24,6 +24,10 @@ int name( jased_ctx_t* const jased_ctx )
 #define DECLARE_ONE_STRING_PARAM_CMD( name ) \
 int name( jased_ctx_t* const jased_ctx, string_buffer_t* const str ) 
 
+
+#define DECLARE_ONE_INT_PARAM_CMD( name ) \
+int name( jased_ctx_t* const jased_ctx, int const val ) 
+
 #define DECLARE_REGSUB_CMD( name ) \
 int name( jased_ctx_t* const jased_ctx,  \
         regex_t const regex, \
@@ -43,9 +47,10 @@ DECLARE_TRANSFORM_CMD( transformcmd );
 DECLARE_ONE_STRING_PARAM_CMD( append );
 DECLARE_ONE_STRING_PARAM_CMD( insert );
 DECLARE_ONE_STRING_PARAM_CMD( change );
-DECLARE_ONE_STRING_PARAM_CMD( write_file );
 DECLARE_ONE_STRING_PARAM_CMD( read_file );
 DECLARE_ONE_STRING_PARAM_CMD( branch );
+
+DECLARE_ONE_INT_PARAM_CMD( write_file );
 
 DECLARE_NO_PARAMS_CMD( empty_cmd );
 DECLARE_NO_PARAMS_CMD( clear_ps );

@@ -2,9 +2,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "jased/io/io.h"
 #include "jased/jased_exit_status.h"
+
 
 #define HANDLE_READ_ERR( action ) \
     do { \
@@ -26,6 +30,48 @@
             exit(ERROR_IO); \
         } \
     } while(0)
+
+int open_filem( char* const filename, int const flags, mode_t mode ) {
+    int fd = open( filename, flags, mode );
+    int errnum = errno;
+
+    if ( fd != -1 ) return fd;
+
+    printerr("jased: can not open file '");
+    printerr( filename );
+    printerr("' : ");
+    printerr( strerror(errnum) );
+    printerr("\n");
+    exit(ERROR_IO);
+}
+
+int open_file( char* const filename, int const flags ) {
+    int fd = open( filename, flags );
+    int errnum = errno;
+
+    if ( fd != -1 ) return fd;
+
+    printerr("jased: can not open file '");
+    printerr( filename );
+    printerr("' : ");
+    printerr( strerror(errnum) );
+    printerr("\n");
+    exit(ERROR_IO);
+}
+
+int close_file( int const fd ) {
+    int result = close(fd);
+    int errnum = errno;
+
+    if ( result != -1 ) return result;
+
+    printerr("jased: internal error - can not close file with fd '");
+    print_int( STDERR_FILENO,  fd );
+    printerr("' : ");
+    printerr( strerror(errnum) );
+    printerr("\n");
+    exit(ERROR_IO);
+}
 
 ssize_t readln( int const stream, io_buffer_t* in, string_buffer_t* const dest ) {
 	size_t i;

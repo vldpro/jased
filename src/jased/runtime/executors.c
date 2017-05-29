@@ -76,6 +76,23 @@ DEFINE_CLEANER( clean_one_param_str ) {
 }
 
 
+DEFINE_RUNNER( exec_one_param_int ) {
+	runtime_ctx_t const rt_ctx = executor-> rt_ctx;
+
+	return executor-> command.run_int_arg( 
+		rt_ctx.jased_ctx, 
+		rt_ctx.args_for.int_param-> int_value 
+	);
+}
+
+DEFINE_CLEANER( clean_one_param_int ) {
+	runtime_ctx_t const rt_ctx = executor-> rt_ctx;
+
+    close_file( rt_ctx.args_for.int_param-> int_value );
+	free( rt_ctx.args_for.int_param );
+	free( executor );
+}
+
 
 DEFINE_RUNNER( exec_regex_sub ) {
 	struct regex_sub_args* const regsub_args = executor-> rt_ctx.args_for.reg_sub;
@@ -89,6 +106,7 @@ DEFINE_RUNNER( exec_regex_sub ) {
         regsub_args-> wfile
 	);
 }
+
 
 DEFINE_CLEANER( clean_regex_sub ) {
 	struct regex_sub_args* const regsub_args = executor-> rt_ctx.args_for.reg_sub;
@@ -123,8 +141,6 @@ DEFINE_CLEANER( clean_line_condition ) {
 	free( executor );
 }
 
-
-#include <stdio.h>
 
 DEFINE_RUNNER( exec_line_range_condition ) {
 	struct lines_range_condition_args* const args = 

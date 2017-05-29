@@ -34,11 +34,16 @@ struct string_param_args {
 	string_buffer_t* string;
 };
 
+struct int_param_args {
+    int int_value;
+};
+
 typedef union cmd_args {
 	void* 						 any_args;
 	struct transform_args*		 tran_args;
 	struct regex_sub_args*   	 reg_sub;
 	struct string_param_args*    string_param;
+    struct int_param_args*       int_param;
 	condition_args_t*     		 condition_args; 
 } cmd_args_t;
 
@@ -50,6 +55,7 @@ typedef struct runtime_ctx {
 
 typedef RT_ERR (*no_params_cmd_t) ( jased_ctx_t* const );
 typedef RT_ERR (*string_param_cmd_t) ( jased_ctx_t* const, string_buffer_t* const );
+typedef RT_ERR (*int_param_cmd_t) ( jased_ctx_t* const, int const );
 typedef RT_ERR (*regex_sub_cmd_t) ( jased_ctx_t* const, regex_t const, string_buffer_t* const, int const, int const, int const );
 typedef RT_ERR (*transform_cmd_t) ( jased_ctx_t* const, string_buffer_t* const, string_buffer_t* const );
 
@@ -59,6 +65,7 @@ typedef union cmd_type {
 	string_param_cmd_t run_str_arg;
 	regex_sub_cmd_t    run_regsub;
 	transform_cmd_t    run_transform;
+    int_param_cmd_t    run_int_arg;
 } cmd_type_t;
 
 typedef struct executor {
@@ -86,6 +93,12 @@ executor_t* construct_regexsub_executor(
 	int const flags,
     int const match_num,
     string_buffer_t* wfile
+);
+
+executor_t* construct_io_executor(
+    jased_ctx_t* const jased_ctx,
+    int_param_cmd_t command,
+	string_buffer_t* const filename 
 );
 
 executor_t* construct_transform_executor(
@@ -154,6 +167,10 @@ DECLARE_CLEANER( clean_no_params );
 
 DECLARE_RUNNER( exec_one_param_str );
 DECLARE_CLEANER( clean_one_param_str );
+
+
+DECLARE_RUNNER( exec_one_param_int );
+DECLARE_CLEANER( clean_one_param_int );
 
 DECLARE_RUNNER( exec_regex_sub );
 DECLARE_CLEANER( clean_regex_sub );

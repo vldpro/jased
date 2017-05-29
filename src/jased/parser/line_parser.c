@@ -244,7 +244,7 @@ static void set_condition_if_present( optional_t condition, interpreter_ctx_t* c
         construct_condition_executor(
             int_ctx-> jased_ctx,
             &(condition.cond),
-            int_ctx-> jased_ctx-> commands_count + 1
+            int_ctx-> jased_ctx-> commands_count
        )
     );
 
@@ -293,7 +293,7 @@ parse_command(
                         opt.cond_command_pointer,
 						construct_condition_executor( 
 							int_ctx-> jased_ctx, 
-							&(opt.cond), int_ctx-> jased_ctx-> commands_count 
+							&(opt.cond), int_ctx-> jased_ctx-> commands_count - 1
 						)
                     );
 				}
@@ -350,6 +350,7 @@ parse_command(
 		case CMD_QUIT: 				{ set_condition_if_present( condition, int_ctx ); DELEGATE_PARSING_TO_FUNCTION( parse_quit ); }
 
 		default: {	
+            if ( cqueue_is_empty(cqueue) ) return PARSING_OK;
 			return ILLEGAL_CHARACTER;
 		}
 	}
@@ -674,6 +675,27 @@ parse_branch( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
 
 static parser_status_t
 parse_read( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
+    chars_queue_t* filename = cqueue_new( sbuffer_new() );
+    skip_spaces( cqueue );
+
+    while( !cqueue_is_empty(cqueue) ) {
+        char const sym = cqueue_gettop(cqueue);
+
+        if ( sym == CMD_DELIM ) break;
+
+        cqueue_push_back( filename, cqueue_getc(cqueue) );
+    }
+
+    execlist_set(
+		int_ctx-> executors_list,
+		int_ctx-> jased_ctx-> commands_count++, 
+		construct_one_param_str_executor(
+			int_ctx-> jased_ctx, read_file, 
+            sbuffer_truncate(filename-> buffer) 
+		)
+	);
+
+    cqueue_delete( filename );
 		
 	return PARSING_OK;
 }
@@ -681,6 +703,27 @@ parse_read( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
 
 static parser_status_t
 parse_write( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
+    chars_queue_t* filename = cqueue_new( sbuffer_new() );
+    skip_spaces( cqueue );
+
+    while( !cqueue_is_empty(cqueue) ) {
+        char const sym = cqueue_gettop(cqueue);
+
+        if ( sym == CMD_DELIM ) break;
+
+        cqueue_push_back( filename, cqueue_getc(cqueue) );
+    }
+
+    execlist_set(
+		int_ctx-> executors_list,
+		int_ctx-> jased_ctx-> commands_count++, 
+		construct_io_executor(
+			int_ctx-> jased_ctx, write_file, 
+            sbuffer_truncate(filename-> buffer) 
+		)
+	);
+
+    cqueue_delete( filename );
 	
 	return PARSING_OK;
 }
