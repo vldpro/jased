@@ -575,111 +575,6 @@ parse_sub( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
 	return UNTERMINATED_SUB;
 }
 
-static parser_status_t
-parse_append( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
-	char sym;
-	chars_queue_t* append_str;
-
-	TRY_GETCHAR( sym, UNCLOSED_APPEND );
-
-	if ( sym != BACKSLASH ) 
-		return INVALID_APPEND_SYNTAX;
-
-    append_str = cqueue_new( sbuffer_new() );
-
-	for ( ; ; ) {
-		char cur_char;
-
-		if ( cqueue_is_empty(cqueue) || (cur_char = cqueue_getc(cqueue)) == CMD_DELIM ) {
-			execlist_set( 
-				int_ctx-> executors_list,
-				int_ctx-> jased_ctx-> commands_count++,
-				construct_one_param_str_executor(
-					int_ctx-> jased_ctx,
-					append,
-					sbuffer_truncate( append_str-> buffer )
-				)
-			);
-
-			cqueue_delete( append_str );
-			return PARSING_OK;
-		}
-
-		cqueue_push_back( append_str, cur_char );
-	}
-}
-
-static parser_status_t
-parse_change( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
-	char sym;
-	chars_queue_t* change_str;
-	TRY_GETCHAR( sym, UNCLOSED_APPEND );
-
-	if ( sym != BACKSLASH ) 
-		return INVALID_CHANGE_SYNTAX;
-
-	change_str = cqueue_new( sbuffer_new() );
-
-	for ( ; ; ) {
-		char cur_char;
-
-		if ( cqueue_is_empty(cqueue) || (cur_char = cqueue_getc(cqueue)) == CMD_DELIM ) {
-			execlist_set( 
-				int_ctx-> executors_list,
-				int_ctx-> jased_ctx-> commands_count++,
-				construct_one_param_str_executor(
-					int_ctx-> jased_ctx,
-					change,
-					sbuffer_truncate( change_str-> buffer )
-				)
-			);
-
-			cqueue_delete( change_str );
-			return PARSING_OK;
-		}
-
-		cqueue_push_back( change_str, cur_char );
-	}
-
-	return PARSING_OK;
-}
-
-static parser_status_t 
-parse_insert( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
-	char sym;
-	chars_queue_t* insert_str;
-	TRY_GETCHAR( sym, UNCLOSED_APPEND );
-
-	if ( sym != BACKSLASH ) 
-		return INVALID_INSERT_SYNTAX;
-
-	insert_str = cqueue_new( sbuffer_new() );
-
-	for ( ; ; ) {
-		char cur_char;
-
-		if ( cqueue_is_empty(cqueue) || (cur_char = cqueue_getc(cqueue)) == CMD_DELIM ) {
-			execlist_set( 
-				int_ctx-> executors_list,
-				int_ctx-> jased_ctx-> commands_count++,
-				construct_one_param_str_executor(
-					int_ctx-> jased_ctx,
-					change,
-					sbuffer_truncate( insert_str-> buffer )
-				)
-			);
-
-			cqueue_delete( insert_str );
-			return PARSING_OK;
-		}
-
-		cqueue_push_back( insert_str, cur_char );
-	}
-		
-	return PARSING_OK;
-
-}
-
 static string_buffer_t* 
 parse_string_operand( chars_queue_t* const cqueue ) {
     chars_queue_t* operand = cqueue_new( sbuffer_new() );
@@ -703,6 +598,66 @@ parse_string_operand( chars_queue_t* const cqueue ) {
 
     return string_operand;
 }
+
+static string_buffer_t* 
+parse_apnd_ins_change_operand( chars_queue_t* const cqueue ) {
+    chars_queue_t* operand = cqueue_new( sbuffer_new() );
+    string_buffer_t* string_operand;
+    skip_spaces( cqueue );
+
+    while( !cqueue_is_empty(cqueue) ) {
+        char const sym = cqueue_gettop(cqueue);
+
+        if ( sym == CMD_DELIM_NEWLINE ) break;
+
+        cqueue_push_back( operand, cqueue_getc(cqueue) );
+    }
+
+    string_operand = sbuffer_truncate( operand-> buffer );
+    cqueue_delete( operand );
+
+    return string_operand;
+}
+
+static parser_status_t
+parse_apnd_ins_change( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx, string_param_cmd_t cmd ) {
+	char sym;
+	string_buffer_t* append_str;
+
+	TRY_GETCHAR( sym, UNCLOSED_APPEND );
+
+	if ( sym != BACKSLASH ) 
+		return INVALID_APPEND_SYNTAX;
+
+    append_str = sbuffer_truncate( parse_apnd_ins_change_operand(cqueue) ); 
+
+    execlist_set( 
+		int_ctx-> executors_list,
+		int_ctx-> jased_ctx-> commands_count++,
+		construct_one_param_str_executor(
+			int_ctx-> jased_ctx,
+			cmd, append_str
+		)
+	);
+
+    return PARSING_OK;
+}
+
+static parser_status_t
+parse_append( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
+    return parse_apnd_ins_change( cqueue, int_ctx, append );
+}
+
+static parser_status_t
+parse_change( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
+    return parse_apnd_ins_change( cqueue, int_ctx, change );
+}
+
+static parser_status_t
+parse_insert( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
+    return parse_apnd_ins_change( cqueue, int_ctx, insert );
+}
+
 
 static parser_status_t
 parse_one_param_str( chars_queue_t* const cqueue, 
