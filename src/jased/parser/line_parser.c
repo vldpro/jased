@@ -118,14 +118,15 @@ parser_status_t parse_line(
         parser_ctx_t* const parser_ctx
 ) {
     optional_t condition;
-    /*condition.cond = malloc( sizeof(struct condition) );*/
-    condition.cond.linestart = 0;
-    condition.cond.lineend = 0;
-    condition.cond.step = 0;
-    condition.is_present = 0;
 
     while( !cqueue_is_empty(cqueue) ) {
         char sym;
+
+        condition.cond.linestart = 0;
+        condition.cond.lineend = 0;
+        condition.cond.step = 0;
+        condition.is_present = COND_NOT_PRESENT;
+
 		skip_spaces(cqueue);
 		sym = cqueue_gettop(cqueue);
 
@@ -136,7 +137,7 @@ parser_status_t parse_line(
 			        return stat;
                 }
 
-			    condition.is_present = 1;
+			    condition.is_present = COND_PRESENT;
                 /* break not writed on purpose */
             }
 
@@ -148,7 +149,7 @@ parser_status_t parse_line(
                         return stat;
                     }
 
-				    condition.is_present = 1;
+				    condition.is_present = COND_PRESENT;
 			    }
 
                 /* parse command */
@@ -156,9 +157,7 @@ parser_status_t parse_line(
 			        return stat;
                 }
 
-                /*free( condition.cond );*/
-
-                condition.is_present = 0;
+                condition.is_present = COND_NOT_PRESENT;
                 break;
             }
 
@@ -249,7 +248,8 @@ static void set_condition_if_present( optional_t condition, interpreter_ctx_t* c
         construct_condition_executor(
             int_ctx-> jased_ctx,
             &(condition.cond),
-            int_ctx-> jased_ctx-> commands_count
+            /* skip one command, and point to after */
+            int_ctx-> jased_ctx-> commands_count + 2 
        )
     );
 
