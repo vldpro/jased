@@ -9,7 +9,7 @@ executors_list_t* execlist_new() {
 
 	execlist-> capacity = DEFAULT_CMD_QUEUE_SIZE;
 	execlist-> size = 0;
-	execlist-> executors = (executor_t**)malloc( sizeof(executor_t*) * execlist-> capacity );
+	execlist-> executors = (executor_t**)calloc( sizeof(executor_t*) , execlist-> capacity );
 
 	return execlist;
 }
@@ -17,7 +17,7 @@ executors_list_t* execlist_new() {
 void execlist_delete( executors_list_t* execlist) {
 	size_t i = 0;
 	for ( ; i < execlist-> size; i++ ) {
-		execlist-> executors[i]-> clean(
+		if( execlist-> executors[i] != NULL ) execlist-> executors[i]-> clean(
 			execlist-> executors[i] 
 		);
 	}
