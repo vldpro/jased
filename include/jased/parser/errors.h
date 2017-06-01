@@ -27,7 +27,7 @@ typedef enum parser_status {
     UNCORRECT_SEARCH_DELIMITER,
     UNCORRECT_SUB_DELIMITER,
     UNCORRECT_TRANSLATE_DELIMITER,
-    EMPTY_STRING_PARAM
+    EMPTY_FILENAME
 } parser_status_t;
 
 char* const get_errmsg( parser_status_t status );
