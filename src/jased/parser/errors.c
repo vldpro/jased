@@ -30,6 +30,8 @@ char* const get_errmsg( parser_status_t status ) {
 
         case EMPTY_LABEL:               return "Parsing error: empty label.\n";
 
+        case EMPTY_FILENAME:               return "Parsing error: filename for read(r) or write(w) command is empty.\n";
+
         case UNCORRECT_SUB_DELIMITER:   return "Parsing error: uncorrect delimiter for substitution (it must not be backslash(\\) or new-line character).\n";
 
         case UNCORRECT_SEARCH_DELIMITER:      return "Parsing error: uncorrect delimiter for substitution (it must not be backslash(\\) or new-line character).\n";
