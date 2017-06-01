@@ -6,6 +6,9 @@
 #include "jased/util/chars_queue.h"
 #include "jased/parser/errors.h"
 
+#define COND_PRESENT 1
+#define COND_NOT_PRESENT 0
+
 struct condition {
     /* start of condition (regex or num) */
 	regex_t regstart;

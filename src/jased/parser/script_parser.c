@@ -56,7 +56,8 @@ parse_commandline_script( char* const script, interpreter_ctx_t* const int_ctx )
     if ( stat != PARSING_OK || parser_ctx-> depth != 0 ) {
         exit_stat.is_ok = 0;
         exit_stat.stop_on_line = 1;
-        exit_stat.stop_on_symbol = cqueue-> start;
+        exit_stat.stop_on_symbol = cqueue-> start + 1;
+        exit_stat.stopped_on_string = script;
         exit_stat.parser_status = stat == PARSING_OK ? UNCLOSED_CMD_LIST : stat;
 
         #ifdef DEBUG_PARSING

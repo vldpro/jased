@@ -128,24 +128,14 @@ ssize_t println( char const* const str ) {
     return println_stream( STDOUT_FILENO, str );
 }
 
+#include <stdio.h>
+
 ssize_t print_int( int const stream, int const value ) {
-    int scale = 10;
-    int remainder = 0;
-    int whole = value;
+    char number[15] = {0};
 
-    if ( whole == 0 ) {
-        WRITE( stream, "0", 1);
-        return 0;
-    }
+    sprintf( number, "%d", value );
 
-    while ( whole != 0 ) {
-        remainder = whole % (scale);
-        whole = whole / scale; 
-        remainder += '0';
-        WRITE( stream, &remainder, 1 );
-
-        scale *= 10;
-    }
+    WRITE( stream, number, 15 );
 
     return 0;
 }

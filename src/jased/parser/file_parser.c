@@ -55,7 +55,8 @@ parse_file( int const file, interpreter_ctx_t* const int_ctx ) {
 
         if ( (stat = parse_line(cqueue, int_ctx, parser_ctx)) != PARSING_OK ) {
             exit_stat.is_ok = 0;
-            exit_stat.stop_on_symbol = cqueue-> start;
+            exit_stat.stop_on_symbol = cqueue-> start + 1;
+            exit_stat.stopped_on_string = sbuffer_clone( cqueue-> buffer )-> char_at;
             exit_stat.parser_status = stat;
 
             #ifdef DEBUG_PARSING

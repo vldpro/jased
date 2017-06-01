@@ -6,6 +6,7 @@
 typedef enum terminal_char {
 	BACKSLASH = '\\',
 	COMMENT = '#',
+    LAST_STRING = '$',
 
 	CMD_SUB_BEGIN = 's',
 	CMD_SUB_DEFAULT_DELIM = '/',
