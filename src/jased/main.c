@@ -52,13 +52,13 @@ static int is_parsing_ok( parser_exit_status_t parser_exval ) {
     print_int( STDERR_FILENO, parser_exval.stop_on_line );
 
     printerr( ", sym " );
-    print_int( STDERR_FILENO, parser_exval.stop_on_symbol );
+    print_int( STDERR_FILENO, parser_exval.stop_on_symbol - 1 );
     printerr(")\n");
 
     printerr("\nError in: ");
     printerr( parser_exval.stopped_on_string );
     printerr("\n          ");
-    for ( i = 1; i < parser_exval.stop_on_symbol; i++ ) 
+    for ( i = 2; i < parser_exval.stop_on_symbol; i++ ) 
         printerr(" ");
     printerr("^\n");
 
