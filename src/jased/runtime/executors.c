@@ -124,11 +124,16 @@ condition_args_t* condition_args_new() {
 	return (condition_args_t*)malloc( sizeof(condition_args_t) );
 }
 
+#define XOR( a, b ) \
+    (!(a) && (b)) || (!(b) && (a))
+
 DEFINE_RUNNER( exec_line_condition ) {
 	struct line_condition_args* const args = executor-> rt_ctx.args_for.condition_args-> line_cond_args;
 	jased_ctx_t* jased_ctx = executor-> rt_ctx.jased_ctx;
 
-	if ( jased_ctx-> current_line != args-> line ) {
+    int condition = jased_ctx-> current_line != args-> line;
+
+	if ( XOR(args-> is_negative, condition) ) {
 		jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
 	}
 
@@ -148,7 +153,10 @@ DEFINE_RUNNER( exec_line_range_condition ) {
 
 	jased_ctx_t* jased_ctx = executor-> rt_ctx.jased_ctx;
 
-	if ( jased_ctx-> current_line < args-> start || jased_ctx-> current_line > args-> end ) {
+    int start_condition = jased_ctx-> current_line < args-> start;
+    int end_condition = jased_ctx-> current_line > args-> end;
+
+	if ( XOR(args-> is_negative, start_condition || end_condition) ) {
 		jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
 	}
 
@@ -167,7 +175,7 @@ DEFINE_RUNNER( exec_regmatch_condition ) {
 
 	jased_ctx_t* jased_ctx = executor-> rt_ctx.jased_ctx;
 
-	if ( !match( jased_ctx-> pattern_space-> char_at, args-> regex ) ) {
+	if ( XOR(args-> is_negative, !match(jased_ctx-> pattern_space-> char_at, args-> regex)) ) {
 		jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
 	}
 
@@ -187,18 +195,24 @@ DEFINE_RUNNER( exec_regmatch_range_condition ) {
 
 	jased_ctx_t* jased_ctx = executor-> rt_ctx.jased_ctx;
 
-	if ( args-> is_start_matched && args-> is_end_matched ) {
-		jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
-		
-	} else if ( !args-> is_start_matched ) {
+	 
+    if ( !args-> is_start_matched ) {
 		if ( match(jased_ctx-> pattern_space-> char_at, args-> start) ) {
 			args-> is_start_matched = 1;
-		}
+            if ( args-> is_negative ) jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
+		} else if ( !args-> is_negative ) {
+            jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
+        }
 
 	} else if ( !args-> is_end_matched ) {
 		if ( match(jased_ctx-> pattern_space-> char_at, args-> end) ) {
 			args-> is_end_matched = 1;
 		} 
+
+        if ( args-> is_negative ) jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
+
+	} else if ( XOR(args-> is_negative, !args-> is_start_matched || args-> is_end_matched) ) {
+		jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
 	}
 
 	return 0;	
@@ -217,14 +231,16 @@ DEFINE_RUNNER( exec_line_regmatch_condition ) {
 		executor-> rt_ctx.args_for.condition_args-> line_regmatch_range_cond_args;
 
 	jased_ctx_t* jased_ctx = executor-> rt_ctx.jased_ctx;
-
-	if ( jased_ctx-> current_line <= args-> start || args-> is_end_matched ) {
-		jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
-
-	} else if ( !args-> is_end_matched ) {
+	
+    if ( !args-> is_end_matched ) {
 		if ( match(jased_ctx-> pattern_space-> char_at, args-> end) ) {
 			args-> is_end_matched = 1;
-		} 	
+		} 
+
+        if ( args-> is_negative ) jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
+        
+	} else if ( XOR(args-> is_negative, jased_ctx-> current_line >= args-> start && args-> is_end_matched) ) {
+		jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
 	}
 
 	return 0;
@@ -243,15 +259,17 @@ DEFINE_RUNNER( exec_regmatch_line_condition ) {
 
 	jased_ctx_t* jased_ctx = executor-> rt_ctx.jased_ctx;
 
-	if ( args-> is_start_matched && args-> end < jased_ctx-> current_line ) {
-		jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
-
-	} else if ( !args-> is_start_matched )  {
+	
+    if ( !args-> is_start_matched )  {
 		if ( match(jased_ctx-> pattern_space-> char_at, args-> start) ) {
 			args-> is_start_matched = 1;
+            if ( args-> is_negative ) jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
 		} else {
-		    jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
+		    if ( !args-> is_negative ) jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
         }
+	} else if ( XOR(args-> is_negative, args-> is_start_matched && args-> end < jased_ctx-> current_line) ) {
+		jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
+
 	}
 
 	return 0;
