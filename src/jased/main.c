@@ -43,6 +43,7 @@ static void delete( struct cmdline_ctx* cmdline_ctx, interpreter_ctx_t** context
 
 /* check parsing exval and if error occured - write errmsg to STDERR */
 static int is_parsing_ok( parser_exit_status_t parser_exval ) {
+    size_t i = 0;
     if ( parser_exval.is_ok ) return 1;
 
     printerr( get_errmsg(parser_exval.parser_status) );
@@ -53,6 +54,13 @@ static int is_parsing_ok( parser_exit_status_t parser_exval ) {
     printerr( ", sym " );
     print_int( STDERR_FILENO, parser_exval.stop_on_symbol );
     printerr(")\n");
+
+    printerr("\nError in: ");
+    printerr( parser_exval.stopped_on_string );
+    printerr("\n          ");
+    for ( i = 1; i < parser_exval.stop_on_symbol; i++ ) 
+        printerr(" ");
+    printerr("^\n");
 
     return 0;
 }
