@@ -35,7 +35,7 @@ string_buffer_t* sbuffer_init( char const* const string ) {
 }
 
 int sbuffer_is_empty( string_buffer_t* const buffer ) {
-	return buffer-> char_at[ buffer-> eos ] == '\0'; 
+	return buffer-> char_at[0] == '\0'; 
 }
 
 void sbuffer_reinit( string_buffer_t* const buffer, char const* const string ) {
