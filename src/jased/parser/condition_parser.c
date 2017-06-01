@@ -146,7 +146,7 @@ do { \
 } while(0)
 
 #define DELIM_NOT_FOUND -1
-int search_delim( chars_queue_t* cqueue, struct condition* const condition ) {
+static int search_delim( chars_queue_t* cqueue, struct condition* const condition ) {
 	if ( cqueue_is_empty(cqueue) 
 	|| ( skip_spaces(cqueue) != -1 && cqueue_gettop(cqueue) != ADDR_DELIM ) ) 
 		return DELIM_NOT_FOUND;
@@ -155,6 +155,15 @@ int search_delim( chars_queue_t* cqueue, struct condition* const condition ) {
 	skip_spaces(cqueue);
 	condition-> step++; 
 	return 0;
+}
+
+#define NEG_FOUND 1
+#define NEG_NOT_FOUND 0
+
+static int search_neg( chars_queue_t* const cqueue ) {
+    skip_spaces(cqueue);
+    if ( cqueue_is_empty(cqueue) || cqueue_gettop(cqueue) != CMD_NEG ) return NEG_NOT_FOUND;
+    return NEG_FOUND;
 }
 
 enum parser_status 
@@ -185,6 +194,7 @@ parse_condition( chars_queue_t* const cqueue, struct condition* const condition 
 			}
 
 			case PARSING_END: {
+                condition-> is_negative = search_neg( cqueue );
 				return PARSING_OK;
 			}
 
