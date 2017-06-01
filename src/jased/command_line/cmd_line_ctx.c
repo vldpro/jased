@@ -83,7 +83,7 @@ get_cmdline_ctx( int const argc, char** argv ) {
         }
     }
 
-    if ( ctx-> args_scripts_count == 0 && ctx-> script_files_count == 0 ) {
+    if ( argc - optind > 0 &&  ctx-> args_scripts_count == 0 && ctx-> script_files_count == 0 ) {
         ctx-> args_scripts_count++;
         ctx-> args_scripts[0] = argv[optind++];
     }
