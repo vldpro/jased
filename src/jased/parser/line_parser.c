@@ -672,33 +672,51 @@ parse_insert( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
 
 }
 
-
-
-static parser_status_t
-parse_one_param_str( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx, string_param_cmd_t cmd ) {
-    chars_queue_t* label = cqueue_new( sbuffer_new() );
+static string_buffer_t* 
+parse_string_operand( chars_queue_t* const cqueue ) {
+    chars_queue_t* operand = cqueue_new( sbuffer_new() );
+    string_buffer_t* string_operand;
     skip_spaces( cqueue );
 
     while( !cqueue_is_empty(cqueue) ) {
         char const sym = cqueue_gettop(cqueue);
 
-        if ( sym == CMD_DELIM || sym == CMD_DELIM_NEWLINE || sym == '\t' || sym == ' ' ) break;
+        if ( sym == CMD_DELIM 
+                || sym == CMD_DELIM_NEWLINE 
+                || sym == '\t' 
+                || sym == ' ' 
+                || sym == CMD_LIST_END ) break;
 
-        cqueue_push_back( label, cqueue_getc(cqueue) );
+        cqueue_push_back( operand, cqueue_getc(cqueue) );
     }
 
-    sbuffer_truncate( label-> buffer );
+    string_operand = sbuffer_truncate( operand-> buffer );
+    cqueue_delete( operand );
 
+    return string_operand;
+}
+
+static parser_status_t
+parse_one_param_str( chars_queue_t* const cqueue, 
+        interpreter_ctx_t* const int_ctx, 
+        string_param_cmd_t cmd,
+        parser_status_t return_on_empty ) {
+
+    string_buffer_t* operand = parse_string_operand(cqueue);
+
+    if ( sbuffer_is_empty(operand) ) { 
+        sbuffer_delete( operand );
+        return return_on_empty;
+    }
+    
     execlist_set(
 		int_ctx-> executors_list,
 		int_ctx-> jased_ctx-> commands_count++, 
 		construct_one_param_str_executor(
-			int_ctx-> jased_ctx, cmd, 
-            label-> buffer
+			int_ctx-> jased_ctx, 
+            cmd, operand
 		)
 	);
-
-    cqueue_delete(label);
 
 	return PARSING_OK;
 }
@@ -706,91 +724,68 @@ parse_one_param_str( chars_queue_t* const cqueue, interpreter_ctx_t* const int_c
 
 static parser_status_t
 parse_test( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
-   return parse_one_param_str( cqueue, int_ctx, test ); 
+    return parse_one_param_str( cqueue, int_ctx, test, EMPTY_LABEL ); 
 }
 
 static parser_status_t
 parse_branch( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
-   return parse_one_param_str( cqueue, int_ctx, branch ); 
+    return parse_one_param_str( cqueue, int_ctx, branch, EMPTY_LABEL ); 
 }
 
 static parser_status_t
 parse_read( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
-    chars_queue_t* filename = cqueue_new( sbuffer_new() );
-    skip_spaces( cqueue );
+    string_buffer_t* operand = parse_string_operand(cqueue);
 
-    while( !cqueue_is_empty(cqueue) ) {
-        char const sym = cqueue_gettop(cqueue);
-
-        if ( sym == CMD_DELIM || sym == CMD_DELIM_NEWLINE || sym == '\t' || sym == ' ' ) break;
-
-        cqueue_push_back( filename, cqueue_getc(cqueue) );
+    if ( sbuffer_is_empty(operand) ) { 
+        sbuffer_delete( operand );
+        return EMPTY_FILENAME;
     }
-
+    
     execlist_set(
 		int_ctx-> executors_list,
 		int_ctx-> jased_ctx-> commands_count++, 
 		construct_one_param_str_executor(
-			int_ctx-> jased_ctx, read_file, 
-            sbuffer_truncate(filename-> buffer) 
+			int_ctx-> jased_ctx, 
+            read_file, operand
 		)
 	);
 
-    cqueue_delete( filename );
-		
 	return PARSING_OK;
 }
 
-
 static parser_status_t
 parse_write( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
-    chars_queue_t* filename = cqueue_new( sbuffer_new() );
-    skip_spaces( cqueue );
+    string_buffer_t* operand = parse_string_operand(cqueue);
 
-    while( !cqueue_is_empty(cqueue) ) {
-        char const sym = cqueue_gettop(cqueue);
-
-        if ( sym == CMD_DELIM || sym == CMD_DELIM_NEWLINE || sym == '\t' || sym == ' ' ) break;
-
-        cqueue_push_back( filename, cqueue_getc(cqueue) );
+    if ( sbuffer_is_empty(operand) ) { 
+        sbuffer_delete( operand );
+        return EMPTY_FILENAME;
     }
-
+    
     execlist_set(
 		int_ctx-> executors_list,
 		int_ctx-> jased_ctx-> commands_count++, 
 		construct_io_executor(
-			int_ctx-> jased_ctx, write_file, 
-            sbuffer_truncate(filename-> buffer) 
+			int_ctx-> jased_ctx, 
+            write_file, operand
 		)
 	);
 
-    cqueue_delete( filename );
-	
 	return PARSING_OK;
 }
 
 static parser_status_t
 parse_label( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
-    chars_queue_t* label = cqueue_new( sbuffer_new() );
-    skip_spaces( cqueue );
+    string_buffer_t* label = parse_string_operand( cqueue );
+    jased_ctx_t* jased_ctx = int_ctx-> jased_ctx;
 
-    while( !cqueue_is_empty(cqueue) ) {
-        char const sym = cqueue_gettop(cqueue);
+    if ( sbuffer_is_empty(label) ) return EMPTY_LABEL;
 
-        if ( sym == CMD_DELIM || sym == CMD_DELIM_NEWLINE || sym == '\t' || sym == ' ' ) break;
-
-        cqueue_push_back( label, cqueue_getc(cqueue) );
-    }
-
-    sbuffer_truncate( label-> buffer );
-
-    if ( label-> buffer-> eos == 0 ) return EMPTY_LABEL;
-
-    if ( hmap_add(int_ctx->jased_ctx-> labels, label-> buffer-> char_at, int_ctx-> jased_ctx-> commands_count) ) {
-        int val = hmap_get( int_ctx-> jased_ctx-> labels, label-> buffer-> char_at );
+    if ( hmap_add(jased_ctx-> labels, label-> char_at, jased_ctx-> commands_count) ) {
+        int val = hmap_get( jased_ctx-> labels, label-> char_at );
 
         if ( val < 0 ) {
-            hmap_set(int_ctx-> jased_ctx-> labels, label-> buffer-> char_at, int_ctx-> jased_ctx-> commands_count);
+            hmap_set(jased_ctx-> labels, label-> char_at, jased_ctx-> commands_count);
         } else return LABEL_DOUBLE_DEFINITION;
     }
 
