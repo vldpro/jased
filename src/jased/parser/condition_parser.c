@@ -1,4 +1,5 @@
 #include <string.h>
+#include <ctype.h>
 
 #include "jased/parser/errors.h"
 #include "jased/parser/terminals.h"
@@ -29,8 +30,8 @@ parse_int ( chars_queue_t* const cqueue, struct condition* const condition ) {
 
 	while ( !cqueue_is_empty(cqueue) ) {
 		char const ch = cqueue_gettop(cqueue);
-		if (ch < '0' || ch > '9') break;
-		result = result*10 + (ch - '0');
+		if ( !isdigit(ch) ) break;
+		result = result * 10 + (ch - '0');
 		cqueue_getc(cqueue);
 	}
 
@@ -124,7 +125,7 @@ parse_cond_expr( chars_queue_t* const cqueue, struct condition* const condition 
 		}
 
 		default: {
-			if ( start_char >= '0' && start_char <= '9' ) {
+			if ( isdigit(start_char) ) {
 				if ( condition-> step == 1 ) condition-> type = LINE;
 				else condition-> type = condition-> type == LINE ? 
 					RANGE_LINE : RANGE_REGEX_LINE;
