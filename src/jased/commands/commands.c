@@ -194,12 +194,28 @@ DEFINE_ONE_STRING_PARAM_CMD( test ) {
 
 /* i command */
 DEFINE_ONE_STRING_PARAM_CMD( insert ) {
-	print( jased_ctx-> out_stream, str );
-	jased_ctx-> is_new_cycle_enable = 1;
+    if ( !jased_ctx-> is_default_output_enable ) {
+	    print( jased_ctx-> out_stream, str );
+        print_stream( jased_ctx-> out_stream, "\n" );
 
-	if ( jased_ctx-> is_default_output_enable ) {
-		print( jased_ctx-> out_stream, jased_ctx-> pattern_space );
-	}
+    } else {
+        string_buffer_t* tmp = sbuffer_clone(jased_ctx-> pattern_space);
+        sbuffer_clear(jased_ctx-> pattern_space);
+        sbuffer_append_buf(
+            jased_ctx-> pattern_space, str
+        );
+
+        sbuffer_append_char(jased_ctx-> pattern_space, '\n');
+
+        sbuffer_append_buf(
+            jased_ctx-> pattern_space, tmp
+        );
+
+        sbuffer_delete(tmp);
+    }
+
+	/* jased_ctx-> is_new_cycle_enable = 1; */
+
 
 	return 0;
 }
