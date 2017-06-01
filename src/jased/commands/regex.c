@@ -99,7 +99,7 @@ int sub( string_buffer_t* const string_buffer, regex_t const regexp, string_buff
 
 int gsub( string_buffer_t* const string_buffer, regex_t const regexp, string_buffer_t* const replacement_buffer, int const flags ) {
 	char* const string = malloc( (string_buffer-> eos + 1) * sizeof(char) );
-	string_buffer_t* original_replacement = sbuffer_clone( replacement_buffer );
+	string_buffer_t* replacement = sbuffer_clone( replacement_buffer );
 	size_t i = 0, j = 0, matched = 0;
 	size_t const str_len = string_buffer-> eos;
 
@@ -111,19 +111,20 @@ int gsub( string_buffer_t* const string_buffer, regex_t const regexp, string_buf
 
 		if ( result ) {
 			free( string );
+            sbuffer_delete(replacement);
 			return matched;
 		} else matched = 1;
 
 		insert_subexpr_matches( 
 			matches, 
 			string_buffer-> char_at + i,
-			replacement_buffer
+			replacement
 		);
 
 		sbuffer_set_end_of_string( string_buffer, i + matches[0].rm_so );
 
 		sbuffer_append_buf(
-			string_buffer, replacement_buffer
+			string_buffer, replacement
 		);
 
 		sbuffer_append(
@@ -132,17 +133,17 @@ int gsub( string_buffer_t* const string_buffer, regex_t const regexp, string_buf
 			str_len - j - matches[0].rm_eo
 		);
 
-		i += matches[0].rm_so + replacement_buffer-> eos;
+		i += matches[0].rm_so + replacement-> eos;
 		j += matches[0].rm_eo;
 
-		sbuffer_reinit( replacement_buffer, original_replacement-> char_at );
+		sbuffer_reinit( replacement, replacement_buffer-> char_at );
 	}
 }
 
 
 int nsub( string_buffer_t* const string_buffer, regex_t const regexp, string_buffer_t* const replacement_buffer, int const num ) {
     char* const string = malloc( (string_buffer-> eos + 1) * sizeof(char) );
-	string_buffer_t* original_replacement = sbuffer_clone( replacement_buffer );
+	string_buffer_t* replacement = sbuffer_clone( replacement_buffer );
     /* i - offset (each iteration i points to the end of last match), n - count of matches */
 	size_t i = 0, j = 0, matched = 0, n = 0;
 	size_t const str_len = string_buffer-> eos;
@@ -155,6 +156,7 @@ int nsub( string_buffer_t* const string_buffer, regex_t const regexp, string_buf
 
 		if ( result ) {
 			free( string );
+            sbuffer_delete( replacement );
 			return matched;
 		} else matched = 1;
 
@@ -162,13 +164,13 @@ int nsub( string_buffer_t* const string_buffer, regex_t const regexp, string_buf
 		    insert_subexpr_matches( 
 			    matches, 
 			    string_buffer-> char_at + i,
-			    replacement_buffer
+			    replacement
 		    );
 
 		    sbuffer_set_end_of_string( string_buffer, i + matches[0].rm_so );
 
 		    sbuffer_append_buf(
-			    string_buffer, replacement_buffer
+			    string_buffer, replacement
 		    );
 
 		    sbuffer_append(
@@ -177,13 +179,13 @@ int nsub( string_buffer_t* const string_buffer, regex_t const regexp, string_buf
 			    str_len - j - matches[0].rm_eo
 		    );
 
-		    i += matches[0].rm_so + replacement_buffer-> eos;
+		    i += matches[0].rm_so + replacement-> eos;
         }
 
         i += matches[0].rm_eo;
 		j += matches[0].rm_eo;
 
-		sbuffer_reinit( replacement_buffer, original_replacement-> char_at );
+		sbuffer_reinit( replacement, replacement_buffer-> char_at );
 	}
 }
 
