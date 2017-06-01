@@ -150,7 +150,8 @@ executor_t* construct_io_executor(
 executor_t* construct_line_condition(
 	jased_ctx_t* const jased_ctx,
 	int const line_num,
-	int const on_fail_cmd
+	int const on_fail_cmd,
+    int const is_negative
 ) {
 	condition_args_t* args = (condition_args_t*)malloc( sizeof(condition_args_t) );
 	executor_t* new_executor = executor_new();
@@ -160,6 +161,7 @@ executor_t* construct_line_condition(
 
 	args-> line_cond_args-> line = line_num;
 	args-> line_cond_args-> if_false_cmd_ptr = on_fail_cmd;
+	args-> line_cond_args-> is_negative = is_negative;
 
 
 	EXECUTOR_INIT(
@@ -176,7 +178,8 @@ executor_t* construct_line_range_condition(
 	jased_ctx_t* const jased_ctx,
 	int const line_start,
 	int const line_end,
-	int const on_fail_cmd
+	int const on_fail_cmd,
+    int const is_negative
 ) {
 	condition_args_t* args = (condition_args_t*)malloc( sizeof(condition_args_t) );
 	executor_t* new_executor = executor_new();
@@ -187,6 +190,7 @@ executor_t* construct_line_range_condition(
 	args-> lines_range_cond_args-> start = line_start;
 	args-> lines_range_cond_args-> end = line_end;
 	args-> lines_range_cond_args-> if_false_cmd_ptr =  on_fail_cmd;
+	args-> lines_range_cond_args-> is_negative = is_negative;
 
 
 	EXECUTOR_INIT(
@@ -201,7 +205,8 @@ executor_t* construct_line_range_condition(
 executor_t* construct_regmatch_condition(
 	jased_ctx_t* const jased_ctx,
 	regex_t const regex,
-	int const on_fail_cmd
+	int const on_fail_cmd,
+    int const is_negative
 ) {
 	
 	condition_args_t* args = (condition_args_t*)malloc( sizeof(condition_args_t) );
@@ -212,6 +217,7 @@ executor_t* construct_regmatch_condition(
 
 	args-> regmatch_cond_args-> regex = regex;
 	args-> regmatch_cond_args-> if_false_cmd_ptr = on_fail_cmd;
+	args-> regmatch_cond_args-> is_negative = is_negative;
 	
 	EXECUTOR_INIT(
 		args, jased_ctx,
@@ -226,7 +232,8 @@ executor_t* construct_regmatch_range_condition(
 	jased_ctx_t* const jased_ctx,
 	regex_t const regstart,
 	regex_t const regend,
-	int const on_fail_cmd
+	int const on_fail_cmd,
+    int const is_negative
 ) {
 	condition_args_t* args = (condition_args_t*)malloc( sizeof(condition_args_t) );
 	executor_t* new_executor = executor_new();
@@ -239,6 +246,7 @@ executor_t* construct_regmatch_range_condition(
 	args-> regmatch_range_cond_args-> if_false_cmd_ptr = on_fail_cmd;
 	args-> regmatch_range_cond_args-> is_start_matched = 0;
 	args-> regmatch_range_cond_args-> is_end_matched = 0;
+	args-> regmatch_range_cond_args-> is_negative = is_negative;
 
 	
 	EXECUTOR_INIT(
@@ -254,7 +262,8 @@ executor_t* construct_line_regmatch_condition(
 	jased_ctx_t* const jased_ctx,
 	int const start,
 	regex_t const regend,
-	int const on_fail_cmd
+	int const on_fail_cmd,
+    int const is_negative
 ) {
 	condition_args_t* args = (condition_args_t*)malloc( sizeof(condition_args_t) );
 	executor_t* new_executor = executor_new();
@@ -267,6 +276,7 @@ executor_t* construct_line_regmatch_condition(
 	args-> line_regmatch_range_cond_args-> end = regend;
 	args-> line_regmatch_range_cond_args-> if_false_cmd_ptr = on_fail_cmd;
 	args-> line_regmatch_range_cond_args-> is_end_matched = 0;
+	args-> line_regmatch_range_cond_args-> is_negative = is_negative;
 	
 	EXECUTOR_INIT(
 		args, jased_ctx,
@@ -281,7 +291,8 @@ executor_t* construct_regmatch_line_condition(
 	jased_ctx_t* const jased_ctx,
 	regex_t const regstart,
 	int const end,
-	int const on_fail_cmd
+	int const on_fail_cmd,
+    int const is_negative
 ) {
 	condition_args_t* args = (condition_args_t*)malloc( sizeof(condition_args_t) );
 	executor_t* new_executor = executor_new();
@@ -294,6 +305,7 @@ executor_t* construct_regmatch_line_condition(
 	args-> regmatch_line_range_cond_args-> end = end;
 	args-> regmatch_line_range_cond_args-> if_false_cmd_ptr = on_fail_cmd;
 	args-> regmatch_line_range_cond_args-> is_start_matched = 0;
+	args-> regmatch_line_range_cond_args-> is_negative = is_negative;
 	
 	EXECUTOR_INIT(
 		args, jased_ctx,

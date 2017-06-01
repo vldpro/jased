@@ -9,6 +9,7 @@
 
 struct line_condition_args {
 	size_t line;
+    int is_negative;
 
 	int if_false_cmd_ptr;
 };
@@ -16,12 +17,14 @@ struct line_condition_args {
 struct lines_range_condition_args {
 	size_t start, end;
 
+    int is_negative;
 	int if_false_cmd_ptr;
 };
 
 struct regmatch_condition_args {
 	regex_t regex;
 
+    int is_negative;
 	int if_false_cmd_ptr;
 };
 
@@ -32,6 +35,7 @@ struct regmatch_range_condition_args {
 	regex_t end;
 	int is_end_matched;
 
+    int is_negative;
 	int if_false_cmd_ptr;
 };
 
@@ -41,6 +45,7 @@ struct line_regmatch_range_condition_args {
 	regex_t end;
 	int is_end_matched;
 
+    int is_negative;
 	int if_false_cmd_ptr;
 };
 
@@ -50,6 +55,7 @@ struct regmatch_line_range_condition_args {
 
 	size_t end;
 
+    int is_negative;
 	int if_false_cmd_ptr;
 };
 

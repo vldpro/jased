@@ -20,6 +20,7 @@
 struct regex_sub_args {
 	regex_t regex;
 	string_buffer_t* replacement;
+
 	int flags;
     int match_num;
     int wfile;
@@ -98,7 +99,7 @@ executor_t* construct_regexsub_executor(
 executor_t* construct_io_executor(
     jased_ctx_t* const jased_ctx,
     int_param_cmd_t command,
-	string_buffer_t* const filename 
+	string_buffer_t* const filename
 );
 
 executor_t* construct_transform_executor(
@@ -122,41 +123,47 @@ executor_t* construct_one_param_str_executor(
 executor_t* construct_line_condition(
 	jased_ctx_t* const jased_ctx,
 	int const line_num,
-	int const on_fail_cmd
+	int const on_fail_cmd,
+    int const is_negative
 );
 
 executor_t* construct_line_range_condition(
 	jased_ctx_t* const jased_ctx,
 	int const line_start,
 	int const line_end,
-	int const on_fail_cmd
+	int const on_fail_cmd,
+    int const is_negative
 );
 
 executor_t* construct_regmatch_condition(
 	jased_ctx_t* const jased_ctx,
 	regex_t const regex,
-	int const on_fail_cmd
+	int const on_fail_cmd,
+    int const is_negative
 );
 
 executor_t* construct_regmatch_range_condition(
 	jased_ctx_t* const jased_ctx,
 	regex_t const regstart,
 	regex_t const regend,
-	int const on_fail_cmd
+	int const on_fail_cmd,
+    int const is_negative
 );
 
 executor_t* construct_line_regmatch_condition(
 	jased_ctx_t* const jased_ctx,
 	int const start,
 	regex_t const regend,
-	int const on_fail_cmd
+	int const on_fail_cmd,
+    int const is_negative
 );
 
 executor_t* construct_regmatch_line_condition(
 	jased_ctx_t* const jased_ctx,
 	regex_t const regstart,
 	int const end,
-	int const on_fail_cmd
+	int const on_fail_cmd,
+    int const is_negative
 );
 
 /* RUNNERS AND CLEANERS */

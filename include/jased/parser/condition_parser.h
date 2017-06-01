@@ -18,6 +18,9 @@ struct condition {
 	regex_t regend;
 	size_t lineend;
 
+    /* is CMD_NEG(!) character found */
+    int is_negative;
+
     /* type of condition */
 	enum condition_type {
 		LINE, RANGE_LINE, REGEX, RANGE_REGEX,

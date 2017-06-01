@@ -306,18 +306,8 @@ DEFINE_NO_PARAMS_CMD( print_line_ps ) {
 		if ( buf[i] == '\n' ) break;
 	}
 
+    /* TODO write */
 	write( jased_ctx-> out_stream, buf, i + 1 );
-	return 0;
-}
-
-/* g command */
-DEFINE_NO_PARAMS_CMD( copy_hs_to_ps ) {
-    printerr("here\n");
-	sbuffer_reinit( 
-		jased_ctx-> pattern_space, 
-		jased_ctx-> hold_space-> char_at
-	);	
-
 	return 0;
 }
 
@@ -332,15 +322,14 @@ DEFINE_NO_PARAMS_CMD( append_hs_to_ps ) {
 	return 0;
 }
 
-/* h command */
-DEFINE_NO_PARAMS_CMD( copy_ps_to_hs ) {
-    sbuffer_clear( jased_ctx-> pattern_space );
-	sbuffer_append_buf( 
-		jased_ctx-> hold_space,
-		jased_ctx-> pattern_space
-	);
+/* g command */
+DEFINE_NO_PARAMS_CMD( copy_hs_to_ps ) {
+    sbuffer_reinit( 
+            jased_ctx-> pattern_space, 
+            jased_ctx-> hold_space-> char_at
+    );
 
-	return 0;
+    return 0;
 }
 
 /* H command */
@@ -351,6 +340,12 @@ DEFINE_NO_PARAMS_CMD( append_ps_to_hs ) {
 	);
 
 	return 0;
+}
+
+/* h command */
+DEFINE_NO_PARAMS_CMD( copy_ps_to_hs ) {
+    sbuffer_clear( jased_ctx-> hold_space );
+	return append_ps_to_hs( jased_ctx );
 }
 
 DEFINE_NO_PARAMS_CMD( exchange_ps_and_hs ) { 

@@ -49,6 +49,7 @@ void sbuffer_reinit_part( string_buffer_t* const buffer, char const* const strin
 
 	strncpy( buffer-> char_at, string, string_len );
 	buffer-> eos = string_len;
+    buffer-> char_at[ buffer-> eos ] = '\0';
 }
 
 static void on_overflow( string_buffer_t* const buffer, size_t const needed_to_append ) {
@@ -88,7 +89,7 @@ void sbuffer_append_buf( string_buffer_t* const dest, string_buffer_t const* con
 	sbuffer_append( dest, src-> char_at, src-> eos );
 }
 
-void sbuffer_set_end_of_string( string_buffer_t* buffer, size_t const i ) {
+void sbuffer_set_end_of_string( string_buffer_t* const buffer, size_t const i ) {
 	buffer-> char_at[i] = '\0';
 	buffer-> eos = i;
 }
@@ -102,7 +103,7 @@ string_buffer_t* sbuffer_truncate( string_buffer_t* const buffer ) {
 	return (string_buffer_t*)buffer;
 }
 
-void sbuffer_clear( string_buffer_t* buffer ) {
+void sbuffer_clear( string_buffer_t* const buffer ) {
 	sbuffer_set_end_of_string( buffer, 0 );
 }
 

@@ -125,6 +125,7 @@ parser_status_t parse_line(
         condition.cond.linestart = 0;
         condition.cond.lineend = 0;
         condition.cond.step = 0;
+        condition.cond.is_negative = 0; 
         condition.is_present = COND_NOT_PRESENT;
 
 		skip_spaces(cqueue);
@@ -193,7 +194,8 @@ construct_condition_executor(
 			return construct_line_condition( 
 				jased_ctx,
 				condition-> linestart,
-				if_false_cmd_ptr	
+				if_false_cmd_ptr,
+                condition-> is_negative
 			);
 
 		case RANGE_LINE:
@@ -201,14 +203,16 @@ construct_condition_executor(
 				jased_ctx,
 				condition-> linestart,
 				condition-> lineend,
-				if_false_cmd_ptr	
+				if_false_cmd_ptr,
+                condition-> is_negative
 			);
 
 		case REGEX:
 			return construct_regmatch_condition(
 				jased_ctx,
 				condition-> regstart,
-				if_false_cmd_ptr	
+				if_false_cmd_ptr,
+                condition-> is_negative
 			);
 
 		case RANGE_REGEX:
@@ -216,7 +220,8 @@ construct_condition_executor(
 				jased_ctx,
 				condition-> regstart,
 				condition-> regend,
-			    if_false_cmd_ptr	
+			    if_false_cmd_ptr,
+                condition-> is_negative
 			);
 
 		case RANGE_LINE_REGEX:
@@ -224,7 +229,8 @@ construct_condition_executor(
 				jased_ctx,
 				condition-> linestart,
 				condition-> regend,
-				if_false_cmd_ptr	
+				if_false_cmd_ptr,
+                condition-> is_negative
 			);
 
 		case RANGE_REGEX_LINE:
@@ -232,7 +238,8 @@ construct_condition_executor(
 				jased_ctx,
 				condition-> regstart,
 				condition-> lineend,
-				if_false_cmd_ptr	
+				if_false_cmd_ptr,
+                condition-> is_negative
 			);
 	}
 
@@ -326,11 +333,11 @@ parse_command(
 
 		case CMD_DELETE_INIT_PS: 	{ set_condition_if_present( condition, int_ctx ); DELEGATE_PARSING_TO_FUNCTION( parse_delete_init_ps ); }
 
-		case CMD_MOVE_HS_TO_PS: 	{ set_condition_if_present( condition, int_ctx ); DELEGATE_PARSING_TO_FUNCTION( parse_replace_hs_by_ps ); }
+		case CMD_MOVE_HS_TO_PS: 	{ set_condition_if_present( condition, int_ctx ); DELEGATE_PARSING_TO_FUNCTION( parse_replace_ps_by_hs ); }
 
 		case CMD_APPEND_HS_TO_PS: 	{ set_condition_if_present( condition, int_ctx ); DELEGATE_PARSING_TO_FUNCTION( parse_append_hs_to_ps ); }
 
-		case CMD_MOVE_PS_TO_HS: 	{ set_condition_if_present( condition, int_ctx ); DELEGATE_PARSING_TO_FUNCTION( parse_replace_ps_by_hs ); }
+		case CMD_MOVE_PS_TO_HS: 	{ set_condition_if_present( condition, int_ctx ); DELEGATE_PARSING_TO_FUNCTION( parse_replace_hs_by_ps ); }
 
 		case CMD_APPEND_PS_TO_HS: 	{ set_condition_if_present( condition, int_ctx ); DELEGATE_PARSING_TO_FUNCTION( parse_append_ps_to_hs ); }
 

@@ -163,6 +163,7 @@ static int search_delim( chars_queue_t* cqueue, struct condition* const conditio
 static int search_neg( chars_queue_t* const cqueue ) {
     skip_spaces(cqueue);
     if ( cqueue_is_empty(cqueue) || cqueue_gettop(cqueue) != CMD_NEG ) return NEG_NOT_FOUND;
+    cqueue_getc(cqueue);
     return NEG_FOUND;
 }
 

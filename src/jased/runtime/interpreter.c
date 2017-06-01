@@ -52,6 +52,24 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
             int_contexts[j]-> jased_ctx-> current_line = line_num;
         }
 
+        #ifdef DEBUG_RUNTIME
+        printerr("\n============RUNTIME DEBUG INFO=============\n");
+
+        printerr( "-dbg- Current line:" );
+        print_int( STDERR_FILENO, line_num );
+        printerr("\n");
+
+        printerr("-dbg----------- PATTERN SPACE --------------+\n");
+        printerr( pattern_space-> char_at );
+        printerr("\n");
+
+        printerr("-dbg------------  HOLD SPACE  --------------+\n");
+        printerr( hold_space-> char_at );
+        printerr("\n");
+
+        printerr("==================END======================\n");
+        #endif
+
         line_num++;
 
 		if ( res != -1 ) {
@@ -60,9 +78,9 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
                 jased_ctx_t* jased_ctx = int_contexts[j]-> jased_ctx;
 			    size_t i = 0;
 
-			    jased_ctx-> command_pointer = 0;
-			    jased_ctx-> is_new_cycle_enable = 0;
-			    jased_ctx-> is_any_subs_matched = 0;
+			    jased_ctx-> command_pointer = 
+                    jased_ctx-> is_new_cycle_enable = 
+                        jased_ctx-> is_any_subs_matched = 0;
 
                 while ( (i = jased_ctx-> command_pointer) < jased_ctx-> commands_count ) {
 			    	int command_exval;
@@ -97,8 +115,6 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
                 print_ps( int_contexts[0]-> jased_ctx );
             }
 
-            /* each cycle sed clean pattern space */
-            clear_ps( int_contexts[0]-> jased_ctx );
 		} else {
             delete( iobuf, pattern_space, hold_space );
 			return;
