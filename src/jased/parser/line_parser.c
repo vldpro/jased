@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <ctype.h>
 
 #include "jased/parser/line_parser.h"
 
@@ -142,7 +143,7 @@ parser_status_t parse_line(
             default: {
                 parser_status_t stat;
                 /* parse num addr */
-                if ( sym >= '0' && sym <= '9' ) {
+                if ( isdigit(sym) ) {
 				    if ( (stat = parse_condition(cqueue, &condition.cond)) != PARSING_OK ) {
                         return stat;
                     }
