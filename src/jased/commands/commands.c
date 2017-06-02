@@ -123,10 +123,10 @@ DEFINE_ONE_STRING_PARAM_CMD( append ) {
 /* i command */
 DEFINE_ONE_STRING_PARAM_CMD( insert ) {
     sbuffer_append_buf(
-        jased_ctx-> before, str
+        jased_ctx-> print_buffer, str
     );
 
-    sbuffer_append_char( jased_ctx-> after, '\n' );
+    sbuffer_append_char( jased_ctx-> print_buffer, '\n' );
 
 	return 0;
 }
@@ -134,8 +134,14 @@ DEFINE_ONE_STRING_PARAM_CMD( insert ) {
 /* c command */
 DEFINE_ONE_STRING_PARAM_CMD( change ) {
 	sbuffer_clear( jased_ctx-> pattern_space );
+
+    sbuffer_append_buf(
+        jased_ctx-> print_buffer, str
+    );
+
+    sbuffer_append_char( jased_ctx-> print_buffer, '\n' );
 	
-	print( jased_ctx-> out_stream, str );
+	/* print( jased_ctx-> out_stream, str ); */
 	jased_ctx-> is_new_cycle_enable = 1;
 
 	return 0;
@@ -159,7 +165,10 @@ DEFINE_ONE_STRING_PARAM_CMD( read_file ) {
     iobuf = io_buffer_new();
 
     while ( readln(fd, iobuf, line) != -1 ) {
-        print( jased_ctx-> out_stream, line ); 
+        sbuffer_append_buf( 
+            jased_ctx-> print_buffer, 
+            line 
+        ); 
     }
 
     sbuffer_delete( line );
@@ -298,7 +307,11 @@ DEFINE_NO_PARAMS_CMD( print_linenum ) {
 
 /* p command */
 DEFINE_NO_PARAMS_CMD( print_ps ) {
-	print( jased_ctx-> out_stream, jased_ctx-> pattern_space );
+	sbuffer_append_buf( 
+        jased_ctx-> print_buffer, 
+        jased_ctx-> pattern_space 
+    );
+
 	return 0;
 }
 
@@ -312,7 +325,11 @@ DEFINE_NO_PARAMS_CMD( print_line_ps ) {
 	}
 
     /* TODO write */
-	write( jased_ctx-> out_stream, buf, i + 1 );
+	sbuffer_append( 
+        jased_ctx-> print_buffer, 
+        buf, i + 1 
+    );
+
 	return 0;
 }
 

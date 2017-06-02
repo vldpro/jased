@@ -13,9 +13,8 @@ typedef struct jased_ctx {
 	string_buffer_t* pattern_space;
 	string_buffer_t* hold_space;
 
-    /* the lines which prints after/before printing pattern space */
+    /* the lines which prints after printing pattern space */
     string_buffer_t* after;
-    string_buffer_t* before;
 
     /* buffer for print commands */
     string_buffer_t* print_buffer;
