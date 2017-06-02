@@ -54,8 +54,9 @@ static int insert_subexpr_matches( regmatch_t* const matches, char const* const 
 	return 0;
 }
 
-int sub( string_buffer_t* const string_buffer, regex_t const regexp, string_buffer_t* const replacement_buffer, int const flags ) {
+int sub( string_buffer_t* const string_buffer, regex_t const regexp, string_buffer_t* const replacement_buf, int const flags ) {
 	regmatch_t matches[10];
+    string_buffer_t* replacement_buffer = sbuffer_clone( replacement_buf );
 	int const result = regexec( &regexp, string_buffer-> char_at, 10, matches, 0 );
 	size_t last_part_length = 0;
 	char* last_part;
