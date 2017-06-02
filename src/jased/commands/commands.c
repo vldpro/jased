@@ -109,11 +109,32 @@ DEFINE_NO_PARAMS_CMD(empty_cmd) {
     return 0;
 }
 
+/* a command */
 DEFINE_ONE_STRING_PARAM_CMD( append ) {
-	if ( jased_ctx-> is_default_output_enable ) {
-		print( jased_ctx-> out_stream, jased_ctx-> pattern_space );
-	}
+    sbuffer_append_buf(
+        jased_ctx-> after, str
+    );
 
+    sbuffer_append_char( jased_ctx-> after, '\n' );
+
+	return 0;
+}
+
+/* i command */
+DEFINE_ONE_STRING_PARAM_CMD( insert ) {
+    sbuffer_append_buf(
+        jased_ctx-> before, str
+    );
+
+    sbuffer_append_char( jased_ctx-> after, '\n' );
+
+	return 0;
+}
+
+/* c command */
+DEFINE_ONE_STRING_PARAM_CMD( change ) {
+	sbuffer_clear( jased_ctx-> pattern_space );
+	
 	print( jased_ctx-> out_stream, str );
 	jased_ctx-> is_new_cycle_enable = 1;
 
@@ -147,6 +168,8 @@ DEFINE_ONE_STRING_PARAM_CMD( read_file ) {
     return 0; 
 }
 
+
+/* b command */
 DEFINE_ONE_STRING_PARAM_CMD( branch ) { 
     int command = hmap_get( jased_ctx-> labels, str-> char_at );
 
@@ -168,6 +191,7 @@ DEFINE_ONE_STRING_PARAM_CMD( branch ) {
 }
 
 
+/* t command */
 DEFINE_ONE_STRING_PARAM_CMD( test ) { 
     int command;
 
@@ -192,43 +216,8 @@ DEFINE_ONE_STRING_PARAM_CMD( test ) {
     return 0;
 }
 
-/* i command */
-DEFINE_ONE_STRING_PARAM_CMD( insert ) {
-    if ( !jased_ctx-> is_default_output_enable ) {
-	    print( jased_ctx-> out_stream, str );
-        print_stream( jased_ctx-> out_stream, "\n" );
-
-    } else {
-        string_buffer_t* tmp = sbuffer_clone(jased_ctx-> pattern_space);
-        sbuffer_clear(jased_ctx-> pattern_space);
-        sbuffer_append_buf(
-            jased_ctx-> pattern_space, str
-        );
-
-        sbuffer_append_char(jased_ctx-> pattern_space, '\n');
-
-        sbuffer_append_buf(
-            jased_ctx-> pattern_space, tmp
-        );
-
-        sbuffer_delete(tmp);
-    }
-
-	/* jased_ctx-> is_new_cycle_enable = 1; */
 
 
-	return 0;
-}
-
-/* c command */
-DEFINE_ONE_STRING_PARAM_CMD( change ) {
-	sbuffer_clear( jased_ctx-> pattern_space );
-	
-	print( jased_ctx-> out_stream, str );
-	jased_ctx-> is_new_cycle_enable = 1;
-
-	return 0;
-}
 
 /* d command */
 DEFINE_NO_PARAMS_CMD( clear_ps ) {
