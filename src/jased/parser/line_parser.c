@@ -256,7 +256,7 @@ static void set_condition_if_present( optional_t condition, interpreter_ctx_t* c
             int_ctx-> jased_ctx,
             &(condition.cond),
             /* skip one command, and point to after */
-            int_ctx-> jased_ctx-> commands_count + 2 
+            int_ctx-> jased_ctx-> commands_count + 1 
        )
     );
 
@@ -472,12 +472,12 @@ parse_sub_flags( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx )
             }
 
             default: {
-                if ( sym >= '0' && sym <= '9' ) {
+                if ( isdigit(sym) ) {
                     res.flags |= N_FLAG;
 
                     while ( !cqueue_is_empty(cqueue) ) {
-                        char const ch = cqueue_gettop(cqueue);
-                        if ( ch < '0' || ch > '9' ) break;
+                        char ch = cqueue_gettop(cqueue);
+                        if ( isdigit(ch) ) break;
                         res.match_num = res.match_num * 10 + (ch - '0');
                         cqueue_getc(cqueue);
                     }
@@ -502,6 +502,7 @@ parse_sub( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
 	chars_queue_t* regex = cqueue_new( sbuffer_new() );
 	chars_queue_t* replacement = cqueue_new( sbuffer_new() );
 
+
 	TRY_GETCHAR( SUB_DELIMITER, UNTERMINATED_SUB );
 
     if ( SUB_DELIMITER == '\\' || SUB_DELIMITER == '\n' ) return UNCORRECT_SUB_DELIMITER;
@@ -515,7 +516,7 @@ parse_sub( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
                 struct sub_args_result res;
 				regex_t reg;	
 
-				if ( regcomp(&reg, regex_str, 0) ) return UNCORRECT_REGEX;
+				if ( regcomp(&reg, regex_str, REG_NEWLINE) ) return UNCORRECT_REGEX;
 
                 res = parse_sub_flags( cqueue, int_ctx );
 
@@ -603,7 +604,6 @@ static string_buffer_t*
 parse_apnd_ins_change_operand( chars_queue_t* const cqueue ) {
     chars_queue_t* operand = cqueue_new( sbuffer_new() );
     string_buffer_t* string_operand;
-    skip_spaces( cqueue );
 
     while( !cqueue_is_empty(cqueue) ) {
         char const sym = cqueue_gettop(cqueue);

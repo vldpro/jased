@@ -210,6 +210,11 @@ DEFINE_ONE_STRING_PARAM_CMD( test ) {
     }
     
     if ( jased_ctx-> is_any_subs_matched == 0 ) return 0;
+    jased_ctx-> is_any_subs_matched = 0;
+
+    /*printerr("branch to ");
+    printerr( str-> char_at );
+    printerr("\n");*/
 
     command = hmap_get( jased_ctx-> labels, str-> char_at );
 
