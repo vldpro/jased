@@ -20,10 +20,18 @@ void interpreter_ctx_delete( interpreter_ctx_t* int_ctx ) {
 	free( int_ctx );
 }
 
-static void delete( io_buffer_t* iobuf, string_buffer_t* ps, string_buffer_t* hs ) {
+static void delete( 
+        io_buffer_t* iobuf, 
+        string_buffer_t* ps, 
+        string_buffer_t* hs,
+        string_buffer_t* after,
+        string_buffer_t* before ) {
+
     io_buffer_delete( iobuf );
     sbuffer_delete( ps );
     sbuffer_delete( hs );
+    sbuffer_delete( after );
+    sbuffer_delete( before );
 }
 
 /* interpreter for interpreter_context */
@@ -31,18 +39,25 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
 	size_t line_num = 1;
     size_t j = 0;
     io_buffer_t* iobuf = io_buffer_new();
+
     string_buffer_t* pattern_space = sbuffer_new();
     string_buffer_t* hold_space = sbuffer_new();
+    string_buffer_t* after_buffer = sbuffer_new();
+    string_buffer_t* before_buffer = sbuffer_new();
 
     if ( contexts_count == 0 ) return;
 
     for ( j = 0; j < contexts_count; j++ ) {
-        int_contexts[j]-> jased_ctx-> in_stream = in_stream;
-        int_contexts[j]-> jased_ctx-> out_stream = STDOUT_FILENO;
-        int_contexts[j]-> jased_ctx-> io_buffer = iobuf;
+        jased_ctx_t* const jased_ctx = int_contexts[j]-> jased_ctx;
 
-        int_contexts[j]-> jased_ctx-> hold_space = hold_space;
-        int_contexts[j]-> jased_ctx-> pattern_space = pattern_space;
+        jased_ctx-> in_stream = in_stream;
+        jased_ctx-> out_stream = STDOUT_FILENO;
+        jased_ctx-> io_buffer = iobuf;
+
+        jased_ctx-> hold_space = hold_space;
+        jased_ctx-> pattern_space = pattern_space;
+        jased_ctx-> after = after_buffer;
+        jased_ctx-> before = before_buffer;
     }
 
 	for( ; ; ) {
@@ -102,7 +117,12 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
                             exit(ERROR_RUNTIME);
                         }
 
-                        delete( iobuf, pattern_space, hold_space );
+                        delete( 
+                            iobuf, pattern_space, 
+                            hold_space, after_buffer, 
+                            before_buffer 
+                        );
+
 					    return;
 				    }
 
@@ -116,7 +136,12 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
             }
 
 		} else {
-            delete( iobuf, pattern_space, hold_space );
+            delete( 
+                iobuf, pattern_space, 
+                hold_space, after_buffer, 
+                before_buffer 
+            );
+
 			return;
 		}
 	}
