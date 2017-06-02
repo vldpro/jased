@@ -132,7 +132,9 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
 
             /* if default output enable, on each cycle sed print pattern space */
             if ( int_contexts[0]-> jased_ctx-> is_default_output_enable ) {
+                print( before_buffer );
                 print_ps( int_contexts[0]-> jased_ctx );
+                print( after_buffer );
             }
 
 		} else {
