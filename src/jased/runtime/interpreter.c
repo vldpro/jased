@@ -25,13 +25,15 @@ static void delete(
         string_buffer_t* ps, 
         string_buffer_t* hs,
         string_buffer_t* after,
-        string_buffer_t* before ) {
+        string_buffer_t* before 
+        string_buffer_t* print ) {
 
     io_buffer_delete( iobuf );
     sbuffer_delete( ps );
     sbuffer_delete( hs );
     sbuffer_delete( after );
     sbuffer_delete( before );
+    sbuffer_delete( print);
 }
 
 /* interpreter for interpreter_context */
@@ -44,6 +46,7 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
     string_buffer_t* hold_space = sbuffer_new();
     string_buffer_t* after_buffer = sbuffer_new();
     string_buffer_t* before_buffer = sbuffer_new();
+    string_buffer_t* print_buffer = sbuffer_new();
 
     if ( contexts_count == 0 ) return;
 
@@ -56,6 +59,8 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
 
         jased_ctx-> hold_space = hold_space;
         jased_ctx-> pattern_space = pattern_space;
+
+        jased_ctx-> print_buffer = print_buffer;
         jased_ctx-> after = after_buffer;
         jased_ctx-> before = before_buffer;
     }
@@ -120,7 +125,7 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
                         delete( 
                             iobuf, pattern_space, 
                             hold_space, after_buffer, 
-                            before_buffer 
+                            before_buffer, print_buffer
                         );
 
 					    return;
@@ -131,17 +136,24 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
             }
 
             /* if default output enable, on each cycle sed print pattern space */
+            print( before_buffer );
+
             if ( int_contexts[0]-> jased_ctx-> is_default_output_enable ) {
-                print( before_buffer );
                 print_ps( int_contexts[0]-> jased_ctx );
-                print( after_buffer );
             }
+
+            print( print_buffer );
+            print( after_buffer );
+
+            sbuffer_clear( print_buffer );
+            sbuffer_clear( after_buffer );
+            sbuffer_clear( before_buffer );
 
 		} else {
             delete( 
                 iobuf, pattern_space, 
                 hold_space, after_buffer, 
-                before_buffer 
+                before_buffer, print_buffer
             );
 
 			return;

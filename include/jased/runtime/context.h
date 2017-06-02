@@ -17,6 +17,9 @@ typedef struct jased_ctx {
     string_buffer_t* after;
     string_buffer_t* before;
 
+    /* buffer for print commands */
+    string_buffer_t* print_buffer;
+
     /* hashmap for sed labels */
     hashmap_t* labels;
 
