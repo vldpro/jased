@@ -24,6 +24,7 @@ typedef struct jased_ctx {
 
     /* number of line, which handling by interpeter */
 	size_t current_line;
+    size_t is_last_line; 
     /* current command pointer */
 	size_t command_pointer;
 

@@ -40,10 +40,10 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
     size_t j = 0;
     io_buffer_t* iobuf = io_buffer_new();
 
-    string_buffer_t* pattern_space = sbuffer_new();
-    string_buffer_t* hold_space = sbuffer_new();
-    string_buffer_t* after_buffer = sbuffer_new();
-    string_buffer_t* print_buffer = sbuffer_new();
+    string_buffer_t* pattern_space  = sbuffer_new();
+    string_buffer_t* hold_space     = sbuffer_new();
+    string_buffer_t* after_buffer   = sbuffer_new();
+    string_buffer_t* print_buffer   = sbuffer_new();
 
     if ( contexts_count == 0 ) return;
 
@@ -63,9 +63,12 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
 
 	for( ; ; ) {
 		ssize_t res = readln( in_stream, iobuf, pattern_space );
+        size_t is_last_line = cache_line( in_stream, iobuf ) == -1 ? 1 : 0;
+
 
         for ( j = 0; j < contexts_count; j++ ) {
             int_contexts[j]-> jased_ctx-> current_line = line_num;
+            int_contexts[j]-> jased_ctx-> is_last_line = is_last_line;
         }
 
         #ifdef DEBUG_RUNTIME
@@ -104,8 +107,8 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
 			    		break;
 
                     if ( int_contexts[j]-> executors_list-> executors[i] == NULL ) {
-                        printerr("Internal error: empty executor.\n");
-                        exit(5);
+                        printerr("FUCK! Internal error: empty executor.\n");
+                        exit(ERROR_RUNTIME);
                     }
 
 			    	command_exval = int_contexts[j]-> executors_list-> executors[i]-> run(

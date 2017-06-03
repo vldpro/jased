@@ -73,9 +73,27 @@ int close_file( int const fd ) {
     exit(ERROR_IO);
 }
 
+ssize_t cache_line( int const stream, io_buffer_t* const in ) {
+    string_buffer_t* cache = sbuffer_new();
+    int res = readln( stream, in, cache );
+
+    if ( res == -1 ) {
+        sbuffer_delete(cache);
+    } else in-> cache = cache;
+
+    return res;
+}
+
 ssize_t readln( int const stream, io_buffer_t* in, string_buffer_t* const dest ) {
 	size_t i;
 	sbuffer_clear( dest );
+
+    if ( in-> cache != NULL ) {
+        sbuffer_reinit( dest, in-> cache-> char_at);
+        sbuffer_delete(in-> cache);
+        in-> cache = NULL;
+        return 0;
+    }
 
 	if ( io_buffer_is_empty(in) ) {
 		HANDLE_READ_ERR( io_buffer_read_next(stream, in) );

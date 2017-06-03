@@ -1,5 +1,6 @@
 #include <string.h>
 #include <ctype.h>
+#include <limits.h>
 
 #include "jased/parser/errors.h"
 #include "jased/parser/terminals.h"
@@ -125,12 +126,21 @@ parse_cond_expr( chars_queue_t* const cqueue, struct condition* const condition 
 		}
 
 		default: {
-			if ( isdigit(start_char) ) {
+			if ( isdigit(start_char) || LAST_STRING == start_char ) {
 				if ( condition-> step == 1 ) condition-> type = LINE;
 				else condition-> type = condition-> type == LINE ? 
 					RANGE_LINE : RANGE_REGEX_LINE;
 
-				return parse_int(cqueue, condition);
+				if ( isdigit(start_char) ) return parse_int(cqueue, condition);
+                else {
+                    cqueue_getc(cqueue);
+	                if ( condition-> type == LINE ) {
+		                condition-> linestart = ULONG_MAX;
+	                } else condition-> lineend = ULONG_MAX;
+
+	                return PARSING_OK;
+                }
+
 			} else return UNTERMINATED_SEARCH;
 		}
 	}

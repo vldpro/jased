@@ -1,4 +1,5 @@
 #include "jased/io/io_buffer.h"
+#include "jased/util/string_buffer.h"
 
 #include <string.h>
 
@@ -12,6 +13,7 @@ io_buffer_t* io_buffer_new_size( size_t size ) {
 	new_buffer-> end_idx = -1;
 	new_buffer-> start_idx = -1; 
 	new_buffer-> buffer = (char*)malloc( sizeof(char) * size );
+    new_buffer-> cache = NULL;
 
 	return new_buffer;
 }
@@ -32,6 +34,7 @@ void io_buffer_clear( io_buffer_t* const io_buffer ) {
 }
 
 void io_buffer_delete( io_buffer_t* io_buffer ) {
+    if ( io_buffer-> cache != NULL ) sbuffer_delete(io_buffer-> cache);
 	free( io_buffer-> buffer );
 	free( io_buffer );
 }

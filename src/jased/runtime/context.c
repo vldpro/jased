@@ -7,6 +7,7 @@ jased_ctx_t* jased_ctx_new() {
     new_ctx-> labels = hmap_new( default_hash, LABELS_DEFAULT_SIZE ); 
 
 	new_ctx-> is_new_cycle_enable = 
+        new_ctx-> is_last_line =
         new_ctx-> is_any_subs_matched = 
         new_ctx-> command_pointer = 
         new_ctx-> current_line = 

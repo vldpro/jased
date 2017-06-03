@@ -1,12 +1,13 @@
 #include <stddef.h>
 #include <malloc.h>
 #include <string.h>
-
-#include "jased/runtime/executors.h"
-
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <limits.h>
+
+
+#include "jased/runtime/executors.h"
 
 /* 	
 	Executors - abstract objects which contains jased commands with their arguments.
@@ -131,7 +132,8 @@ DEFINE_RUNNER( exec_line_condition ) {
 	struct line_condition_args* const args = executor-> rt_ctx.args_for.condition_args-> line_cond_args;
 	jased_ctx_t* jased_ctx = executor-> rt_ctx.jased_ctx;
 
-    int condition = jased_ctx-> current_line != args-> line;
+    int condition = args-> line != ULONG_MAX ? 
+        jased_ctx-> current_line != args-> line : !jased_ctx-> is_last_line;
 
 	if ( XOR(args-> is_negative, condition) ) {
 		jased_ctx-> command_pointer = args-> if_false_cmd_ptr;
@@ -153,7 +155,9 @@ DEFINE_RUNNER( exec_line_range_condition ) {
 
 	jased_ctx_t* jased_ctx = executor-> rt_ctx.jased_ctx;
 
-    int start_condition = jased_ctx-> current_line < args-> start;
+    int start_condition = args-> start != ULONG_MAX ? 
+        jased_ctx-> current_line < args-> start : !jased_ctx-> is_last_line;
+
     int end_condition = jased_ctx-> current_line > args-> end;
 
 	if ( XOR(args-> is_negative, start_condition || end_condition) ) {
@@ -258,7 +262,6 @@ DEFINE_RUNNER( exec_regmatch_line_condition ) {
 		executor-> rt_ctx.args_for.condition_args-> regmatch_line_range_cond_args;
 
 	jased_ctx_t* jased_ctx = executor-> rt_ctx.jased_ctx;
-
 	
     if ( !args-> is_start_matched )  {
 		if ( match(jased_ctx-> pattern_space-> char_at, args-> start) ) {

@@ -5,11 +5,16 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "jased/util/string_buffer.h"
+
 typedef struct io_buffer {
 	int start_idx;
 	int end_idx;
+
 	char* buffer;
 	size_t size;
+
+    string_buffer_t* cache;
 } io_buffer_t;
 
 io_buffer_t* io_buffer_new();

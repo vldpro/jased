@@ -145,7 +145,7 @@ parser_status_t parse_line(
             default: {
                 parser_status_t stat;
                 /* parse num addr */
-                if ( isdigit(sym) ) {
+                if ( isdigit(sym) || sym == LAST_STRING ) {
 				    if ( (stat = parse_condition(cqueue, &condition.cond)) != PARSING_OK ) {
                         return stat;
                     }
