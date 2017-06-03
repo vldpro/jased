@@ -10,5 +10,8 @@
 #define DEFAULT_OUTPUT_ENABLE 1
 #define DEFAULT_OUTPUT_DISABLE 0
 
+#define ENABLE 1
+#define DISABLE 0
+
 #endif
 

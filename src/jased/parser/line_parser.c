@@ -477,7 +477,7 @@ parse_sub_flags( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx )
 
                     while ( !cqueue_is_empty(cqueue) ) {
                         char ch = cqueue_gettop(cqueue);
-                        if ( isdigit(ch) ) break;
+                        if ( !isdigit(ch) ) break;
                         res.match_num = res.match_num * 10 + (ch - '0');
                         cqueue_getc(cqueue);
                     }

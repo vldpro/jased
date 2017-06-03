@@ -9,8 +9,8 @@
 #include <regex.h>
 #include <jased/util/string_buffer.h>
 
-#define NO_MATCHES 1
-#define MATCH 0
+#define NO_MATCHES 0
+#define MATCH 1
 
 
 /** 	

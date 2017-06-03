@@ -15,9 +15,14 @@ typedef enum sub_flags {
     G_FLAG = 16 
 } sub_flags_t;
 
-#define IS_FLAG_ENABLE( src, flag ) ((src) & (flag)) != 0
-
+/* commands exit code */
+#define COMPLETED_SUCCESSFULLY 0
+#define QUIT_COMMAND 1
 #define UNDEFINED_LABEL_FOR_BRANCH 2
+
+
+
+#define IS_FLAG_ENABLE( src, flag ) ((src) & (flag)) != 0
 
 #define DECLARE_NO_PARAMS_CMD( name ) \
 int name( jased_ctx_t* const jased_ctx )
