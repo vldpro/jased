@@ -64,7 +64,7 @@ int sub( string_buffer_t* const string_buffer, regex_t const regexp, string_buff
 	size_t last_part_length = 0;
 	char* last_part;
 
-	if ( result ) return 0;
+	if ( result ) return NO_MATCHES;
 
 	last_part_length = string_buffer-> eos - matches[0].rm_eo;
 	last_part = malloc( (last_part_length + 1) * sizeof(char) );
@@ -98,13 +98,10 @@ int sub( string_buffer_t* const string_buffer, regex_t const regexp, string_buff
 	return 1;
 }
 
-#include "jased/io/io.h"
-#include "stdio.h"
-
 int gsub( string_buffer_t* const string_buffer, regex_t const regexp, string_buffer_t* const replacement_buffer, int const flags ) {
 	char* const string = malloc( (string_buffer-> eos + 1) * sizeof(char) );
 	string_buffer_t* replacement = sbuffer_clone( replacement_buffer );
-	size_t i = 0, j = 0, matched = 0;
+	size_t i = 0, j = 0, matched = NO_MATCHES;
 	size_t const str_len = string_buffer-> eos;
 
 	strcpy( string, string_buffer-> char_at );
@@ -117,7 +114,7 @@ int gsub( string_buffer_t* const string_buffer, regex_t const regexp, string_buf
 			free( string );
             sbuffer_delete(replacement);
 			return matched;
-		} else matched = 1;
+		} else matched = MATCH;
 
 		insert_subexpr_matches( 
 			matches, 
@@ -149,7 +146,7 @@ int nsub( string_buffer_t* const string_buffer, regex_t const regexp, string_buf
     char* const string = malloc( (string_buffer-> eos + 1) * sizeof(char) );
 	string_buffer_t* replacement = sbuffer_clone( replacement_buffer );
     /* i - offset (each iteration i points to the end of last match), n - count of matches */
-	size_t i = 0, j = 0, matched = 0, n = 0;
+	size_t i = 0, j = 0, matched = NO_MATCHES, n = 0;
 	size_t const str_len = string_buffer-> eos;
 
 	strcpy( string, string_buffer-> char_at );
@@ -162,7 +159,7 @@ int nsub( string_buffer_t* const string_buffer, regex_t const regexp, string_buf
 			free( string );
             sbuffer_delete( replacement );
 			return matched;
-		} else matched = 1;
+		} else matched = MATCH;
 
         if ( ++n == num ) {
 		    insert_subexpr_matches( 
