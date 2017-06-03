@@ -5,8 +5,6 @@
 
 #include <jased/commands/regex.h>
 
-#define REVERSE_LINK_LEN 2
-
 int match( char const* const string, regex_t const regexp ){
 	return !regexec( &regexp, string, 0, NULL, 0);
 }
@@ -20,11 +18,16 @@ static int insert_subexpr_matches( regmatch_t* const matches, char const* const 
 
 	for ( ; i < replacement_buffer-> eos; i++, replacement++ ) {
 
-		if ( replacement_buffer-> char_at[i] == '\\' 
-		&& replacement_buffer-> char_at[i+1] >= '1' 
-		&& replacement_buffer-> char_at[i+1] <= '9' ) {
+		if ( replacement_buffer-> char_at[i] == '&' 
+        || (replacement_buffer-> char_at[i] == '\\' 
+		&& replacement_buffer-> char_at[i+1] >= '0' 
+		&& replacement_buffer-> char_at[i+1] <= '9') ) {
 
-			short const match_num = replacement_buffer-> char_at[i+1] - 48;		
+			short const match_num = replacement_buffer-> char_at[i] == '&' ?
+                    0 : replacement_buffer-> char_at[i+1] - 48;		
+
+            short const link_length = replacement_buffer-> char_at[i] == '&' ?  1 : 2;
+
 			size_t const subexpr_match_len = matches[ match_num ].rm_eo - matches[ match_num ].rm_so;
 			
 			sbuffer_set_end_of_string( replacement_buffer, i );
@@ -35,7 +38,7 @@ static int insert_subexpr_matches( regmatch_t* const matches, char const* const 
 				subexpr_match_len
 			);
 
-			replacement += REVERSE_LINK_LEN;
+			replacement += link_length;
 
 			sbuffer_append(
 				replacement_buffer,
