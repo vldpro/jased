@@ -22,6 +22,7 @@ void execlist_delete( executors_list_t* execlist) {
 		);
 	}
 
+    free( execlist-> executors );
 	free( execlist );
 }
 

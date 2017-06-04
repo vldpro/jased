@@ -1,5 +1,7 @@
 #include <unistd.h>
 #include <ctype.h>
+#include <errno.h>
+#include <string.h>
 
 #include "jased/parser/line_parser.h"
 
@@ -514,9 +516,23 @@ parse_sub( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
 			if ( ++delim_count == 3 ) {
 				char* regex_str = sbuffer_truncate( regex-> buffer )-> char_at;
                 struct sub_args_result res;
+                int errcode;
 				regex_t reg;	
 
-				if ( regcomp(&reg, regex_str, REG_NEWLINE) ) return UNCORRECT_REGEX;
+				if ( (errcode = regcomp(&reg, regex_str, REG_NEWLINE)) ) { 
+                    string_buffer_t* errbuf = sbuffer_new();
+                    regerror(errcode, &reg, errbuf-> char_at, errbuf-> size);
+
+                    printerr("jased: regex parsing error : ");
+                    printerr(errbuf-> char_at);
+                    printerr("\n");
+
+                    sbuffer_delete(errbuf);
+
+                    return UNCORRECT_REGEX;
+                }
+
+                sbuffer_delete(regex-> buffer);
 
                 res = parse_sub_flags( cqueue, int_ctx );
 

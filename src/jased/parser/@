@@ -56,15 +56,9 @@ create_regex( chars_queue_t* cqueue, struct condition* const condition ) {
 
     cqueue-> buffer = buf;
 
-	if ( (errcode = regcomp(&reg, regex_str, 0)) ) {
+	if ( regcomp(&reg, regex_str, 0) ) {
         string_buffer_t* errbuf = sbuffer_new();
-        regerror( errcode, &reg, errbuf-> char_at, errbuf-> size);
-
-        printerr("jased: regex parsing error : ");
-        printerr(errbuf-> char_at);
-        printerr("\n");
-
-        sbuffer_delete(errbuf);
+        regerror();
 
         return UNCORRECT_REGEX;
     }

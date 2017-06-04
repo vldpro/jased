@@ -1,7 +1,7 @@
 #ifndef JASED_IO_BUFFER
 #define JASED_IO_BUFFER
 
-#define INPUT_BUFFER_SIZE 4096
+#define INPUT_BUFFER_SIZE 1024 
 #include <stdlib.h>
 #include <unistd.h>
 

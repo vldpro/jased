@@ -181,6 +181,9 @@ void hmap_delete( hashmap_t* hmap ) {
 			hmap->container[i] = NULL;
 		}
 	}
+
+    free(hmap-> container);
+    free(hmap);
 }
 
 int hmap_set( hashmap_t* const hmap, char* const key, int const value ) {

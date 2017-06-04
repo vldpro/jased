@@ -112,7 +112,7 @@ DEFINE_RUNNER( exec_regex_sub ) {
 DEFINE_CLEANER( clean_regex_sub ) {
 	struct regex_sub_args* const regsub_args = executor-> rt_ctx.args_for.reg_sub;
 
-	/*regfree( regsub_args-> regex );	*/
+	regfree( &(regsub_args-> regex) );
     if ( regsub_args-> wfile != -1 ) close( regsub_args-> wfile ); 
 	sbuffer_delete( regsub_args-> replacement );	
 	free( regsub_args );
@@ -187,7 +187,7 @@ DEFINE_RUNNER( exec_regmatch_condition ) {
 }
 
 DEFINE_CLEANER( clean_regmatch_condition ) {
-	/*regfree( executor-> rt_ctx.args_for.condition_args-> regmatch_cond_args-> regex ) */
+	regfree( &(executor-> rt_ctx.args_for.condition_args-> regmatch_cond_args-> regex) );
 	free( executor-> rt_ctx.args_for.condition_args-> regmatch_cond_args );
 	free( executor-> rt_ctx.args_for.condition_args );
 	free( executor );
@@ -223,8 +223,8 @@ DEFINE_RUNNER( exec_regmatch_range_condition ) {
 }
 
 DEFINE_CLEANER( clean_regmatch_range_condition ) {
-		/*regfree( executor-> rt_ctx.args_for.condition_args-> regmatch_range_cond_args-> start );
-		regfree( executor-> rt_ctx.args_for.condition_args-> regmatch_range_cond_args-> end ); */
+		regfree( &(executor-> rt_ctx.args_for.condition_args-> regmatch_range_cond_args-> start) );
+		regfree( &(executor-> rt_ctx.args_for.condition_args-> regmatch_range_cond_args-> end) );
 		free( executor-> rt_ctx.args_for.condition_args-> regmatch_range_cond_args );
 		free( executor-> rt_ctx.args_for.condition_args );
 		free( executor );
@@ -251,7 +251,7 @@ DEFINE_RUNNER( exec_line_regmatch_condition ) {
 }
 
 DEFINE_CLEANER( clean_line_regmatch_condition ) {
-	/*regfree( executor-> rt_ctx.args_for.condition_args-> line_regmatch_range_cond_args-> end ); */
+	regfree( &(executor-> rt_ctx.args_for.condition_args-> line_regmatch_range_cond_args-> end) );
 	free( executor-> rt_ctx.args_for.condition_args-> line_regmatch_range_cond_args );
 	free( executor-> rt_ctx.args_for.condition_args );
 	free( executor );
@@ -279,7 +279,7 @@ DEFINE_RUNNER( exec_regmatch_line_condition ) {
 }
 
 DEFINE_CLEANER( clean_regmatch_line_condition ) {
-	/* regfree( executor-> rt_ctx.args_for.condition_args-> regmatch_line_range_cond_args-> start ); */
+	regfree( &(executor-> rt_ctx.args_for.condition_args-> regmatch_line_range_cond_args-> start) );
 	free( executor-> rt_ctx.args_for.condition_args-> regmatch_line_range_cond_args );
 	free( executor-> rt_ctx.args_for.condition_args );
 	free( executor );

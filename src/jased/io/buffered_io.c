@@ -16,7 +16,7 @@
         int errnum = errno; \
         if ( res == -1 ) { \
             char* const errmsg = strerror(errnum); \
-            printerr("jased: read error."); \
+            printerr("jased: read error : "); \
             printerr(errmsg); \
             printerr("\n"); \
             exit(ERROR_IO); \

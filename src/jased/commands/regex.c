@@ -59,15 +59,18 @@ static int insert_subexpr_matches( regmatch_t* const matches, char const* const 
 
 int sub( string_buffer_t* const string_buffer, regex_t const regexp, string_buffer_t* const replacement_buf, int const flags ) {
 	regmatch_t matches[10];
-    string_buffer_t* replacement_buffer = sbuffer_clone( replacement_buf );
+    string_buffer_t* replacement_buffer;
 	int const result = regexec( &regexp, string_buffer-> char_at, 10, matches, 0);
 	size_t last_part_length = 0;
 	char* last_part;
 
-	if ( result ) return NO_MATCHES;
+	if ( result ) { 
+        return NO_MATCHES;
+    }
 
 	last_part_length = string_buffer-> eos - matches[0].rm_eo;
 	last_part = malloc( (last_part_length + 1) * sizeof(char) );
+    replacement_buffer = sbuffer_clone( replacement_buf );
 
 	strcpy( last_part, string_buffer-> char_at + matches[0].rm_eo );
 
@@ -94,8 +97,9 @@ int sub( string_buffer_t* const string_buffer, regex_t const regexp, string_buff
 	);
 
 	free( last_part );
+    sbuffer_delete(replacement_buffer);
 
-	return 1;
+	return MATCH;
 }
 
 int gsub( string_buffer_t* const string_buffer, regex_t const regexp, string_buffer_t* const replacement_buffer, int const flags ) {
