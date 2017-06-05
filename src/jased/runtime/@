@@ -1,7 +1,4 @@
 #include <malloc.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 
 #include "jased/runtime/interpreter.h"
 #include "jased/runtime/context.h"
@@ -37,18 +34,15 @@ static void delete(
     sbuffer_delete( print);
 }
 
-static io_buffer_t* get_optimal_io_buffer( int const stream ) {
+io_buffer_t* get_optimal_io_buffer( int const stream ) {
     struct stat stat;
-    fstat( stream, &stat );
-
-    return io_buffer_new( stat.st_blksize );
 }
 
 /* interpreter for interpreter_context */
 void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t const contexts_count ) {
 	size_t line_num = 1;
     size_t j = 0;
-    io_buffer_t* iobuf = get_optimal_io_buffer(in_stream); 
+    io_buffer_t* iobuf = io_buffer_new();
 
     string_buffer_t* pattern_space  = sbuffer_new();
     string_buffer_t* hold_space     = sbuffer_new();
