@@ -544,7 +544,7 @@ parse_sub( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
 					    int_ctx-> jased_ctx-> commands_count++,
 					    construct_regexsub_executor(
 						    int_ctx-> jased_ctx,
-						    gsubcmd, reg, replacement-> buffer, 
+						    gsubcmd, reg, escape(replacement-> buffer), 
                             res.flags, 0, res.wfile 
 					    )
 				    );
