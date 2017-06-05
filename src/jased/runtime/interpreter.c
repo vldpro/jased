@@ -40,7 +40,6 @@ static void delete(
 static io_buffer_t* get_optimal_io_buffer( int const stream ) {
     struct stat stat;
     fstat( stream, &stat );
-
     return io_buffer_new( stat.st_blksize );
 }
 
@@ -49,6 +48,7 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
 	size_t line_num = 1;
     size_t j = 0;
     io_buffer_t* iobuf = get_optimal_io_buffer(in_stream); 
+    int is_tty = isatty(in_stream);
 
     string_buffer_t* pattern_space  = sbuffer_new();
     string_buffer_t* hold_space     = sbuffer_new();
@@ -73,7 +73,8 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
 
 	for( ; ; ) {
 		ssize_t res = readln( in_stream, iobuf, pattern_space );
-        size_t is_last_line = cache_line( in_stream, iobuf ) == -1 ? 1 : 0;
+        /* if in_stream is a tty - we can not check last string */
+        size_t is_last_line = is_tty ? 0 : (cache_line( in_stream, iobuf ) == -1 ? 1 : 0);
 
 
         for ( j = 0; j < contexts_count; j++ ) {
