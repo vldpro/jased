@@ -205,14 +205,3 @@ int default_hash( char* value ) {
 
 	return hcode;
 }
-
-void hmap_debug( hashmap_t* const hmap ) {
-	size_t size = hmap->size;
-	size_t i = 0;
-
-	for(i = 0; i < size; i++) {
-		chain_t* current_chain = hmap->container[i];	
-		if(current_chain != NULL)
-			printf("Load coef hash[%d]: %d\n", (int)i, (int)current_chain->length);
-	}
-}
