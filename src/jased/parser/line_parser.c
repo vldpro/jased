@@ -495,6 +495,8 @@ parse_sub_flags( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx )
     return res;
 }
 
+#include "jased/util/escape_transformer.h"
+
 static parser_status_t
 parse_sub( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
 	char SUB_DELIMITER;
@@ -514,10 +516,11 @@ parse_sub( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
 			
 		if ( cur_char == SUB_DELIMITER && bs_count % 2 == 0 ) {
 			if ( ++delim_count == 3 ) {
-				char* regex_str = sbuffer_truncate( regex-> buffer )-> char_at;
+				char* regex_str = escape( sbuffer_truncate(regex-> buffer) )-> char_at;
                 struct sub_args_result res;
                 int errcode;
 				regex_t reg;	
+
 
 				if ( (errcode = regcomp(&reg, regex_str, REG_NEWLINE)) ) { 
                     string_buffer_t* errbuf = sbuffer_new();
@@ -532,7 +535,6 @@ parse_sub( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
                     return UNCORRECT_REGEX;
                 }
 
-                sbuffer_delete(regex-> buffer);
 
                 res = parse_sub_flags( cqueue, int_ctx );
 
@@ -553,7 +555,7 @@ parse_sub( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
 					    int_ctx-> jased_ctx-> commands_count++,
 				    	construct_regexsub_executor(
 				    		int_ctx-> jased_ctx,
-				    		nsubcmd, reg, replacement-> buffer,
+				    		nsubcmd, reg, escape(replacement-> buffer),
                             res.flags, res.match_num, res.wfile 
 					    )
 				    );
@@ -564,12 +566,14 @@ parse_sub( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
 					    int_ctx-> jased_ctx-> commands_count++,
 					    construct_regexsub_executor(
 						    int_ctx-> jased_ctx,
-						    subcmd, reg, replacement-> buffer,
+						    subcmd, reg, escape(replacement-> buffer),
                             res.flags, 0, res.wfile 
 					    )
 				    );
                 }
 
+                sbuffer_delete(regex-> buffer);
+                sbuffer_delete(replacement-> buffer);
 				cqueue_delete( regex );
 				cqueue_delete( replacement);
 				return PARSING_OK;
