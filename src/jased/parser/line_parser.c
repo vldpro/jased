@@ -502,6 +502,7 @@ parse_sub( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
 	char SUB_DELIMITER;
 	size_t bs_count = 0;
 	size_t delim_count = 1;
+    size_t flag = 0;
 
 	chars_queue_t* regex = cqueue_new( sbuffer_new() );
 	chars_queue_t* replacement = cqueue_new( sbuffer_new() );
@@ -538,7 +539,7 @@ parse_sub( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
 
                 res = parse_sub_flags( cqueue, int_ctx );
 
-                if ( IS_FLAG_ENABLE(res.flags, G_FLAG) ) {
+                if ( !flag && IS_FLAG_ENABLE(res.flags, G_FLAG) ) {
                     execlist_set( 
 					    int_ctx-> executors_list, 
 					    int_ctx-> jased_ctx-> commands_count++,
@@ -549,7 +550,7 @@ parse_sub( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
 					    )
 				    );
 
-                } else if ( IS_FLAG_ENABLE(res.flags, N_FLAG) ) {
+                } else if ( !flag && IS_FLAG_ENABLE(res.flags, N_FLAG) ) {
                     execlist_set( 
 					    int_ctx-> executors_list, 
 					    int_ctx-> jased_ctx-> commands_count++,
@@ -583,8 +584,10 @@ parse_sub( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
 			continue;
 		}
 
-		if ( delim_count == 1 ) cqueue_push_back( regex, cur_char );
-		else cqueue_push_back( replacement, cur_char );
+		if ( delim_count == 1 ) {
+            if ( cur_char == '$' || cur_char == '^' ) flag = 1;
+            cqueue_push_back( regex, cur_char );
+        } else cqueue_push_back( replacement, cur_char );
 			
 		bs_count = cur_char == BACKSLASH ?
 			bs_count + 1 : 0;

@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include "jased/util/string_buffer.h"
 #include "jased/commands/commands.h"
@@ -222,25 +223,40 @@ DEFINE_ONE_STRING_PARAM_CMD( test ) {
 /* d command */
 DEFINE_NO_PARAMS_CMD( clear_ps ) {
 	sbuffer_clear( jased_ctx-> pattern_space );
+	jased_ctx-> is_new_cycle_enable = 1;
+
 	return COMPLETED_SUCCESSFULLY;
 }
 
 /* D command */
 DEFINE_NO_PARAMS_CMD( delete_first_line_ps ) {
 	string_buffer_t* pattern_space = jased_ctx-> pattern_space;
+	string_buffer_t* new_pattern_space;
 	size_t i = 0;	
+
 	for ( ; i < pattern_space-> eos; i++ ) {
 		if ( pattern_space-> char_at[i] == '\n' ) break;
 	}
 
-	if ( i == pattern_space-> eos ) {
+	if ( pattern_space-> char_at[i] == '\0') {
 		sbuffer_clear( jased_ctx-> pattern_space );
+	    return COMPLETED_SUCCESSFULLY;
 	}
 
-	sbuffer_reinit( 
+
+    new_pattern_space = sbuffer_init( pattern_space-> char_at + i + 1 );
+    sbuffer_clear( jased_ctx-> pattern_space );
+    sbuffer_append_buf( 
+            jased_ctx-> pattern_space, 
+            new_pattern_space
+    );
+
+    sbuffer_delete( new_pattern_space );
+
+	/*sbuffer_reinit( 
 		pattern_space, 
 		pattern_space-> char_at + i + 1 
-	);
+	);*/
 
 	jased_ctx-> is_new_cycle_enable = 1;
 
@@ -249,16 +265,24 @@ DEFINE_NO_PARAMS_CMD( delete_first_line_ps ) {
 
 /* n command */
 DEFINE_NO_PARAMS_CMD( next ) {
+    int res = 0;
+
 	if ( jased_ctx-> is_default_output_enable )
 		print( jased_ctx-> out_stream, jased_ctx-> pattern_space );
 
 	sbuffer_clear( jased_ctx-> pattern_space );
 
-	readln( 
+	res = readln( 
 		jased_ctx-> in_stream, 
 		jased_ctx-> io_buffer,
 		jased_ctx-> pattern_space 
 	);
+
+
+    if ( res != -1 ) {
+        jased_ctx-> is_last_line = isatty(jased_ctx-> in_stream) ?
+            0 : (cache_line( jased_ctx-> in_stream, jased_ctx-> io_buffer ) == -1 ? 1 : 0); 
+    }
 
 	return COMPLETED_SUCCESSFULLY;
 }
@@ -278,7 +302,13 @@ DEFINE_NO_PARAMS_CMD( next_append ) {
 		buf
 	);
 
-	if ( res == -1 ) return quit(jased_ctx);
+
+	if ( res == -1 ) { 
+        return quit(jased_ctx);
+    }
+
+    jased_ctx-> is_last_line = isatty(jased_ctx-> in_stream) ?
+        0 : (cache_line( jased_ctx-> in_stream, jased_ctx-> io_buffer ) == -1 ? 1 : 0); 
 
 	sbuffer_append_buf(
 		jased_ctx-> pattern_space, buf

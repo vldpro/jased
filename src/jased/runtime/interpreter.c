@@ -45,7 +45,6 @@ static io_buffer_t* get_optimal_io_buffer( int const stream ) {
 
 /* interpreter for interpreter_context */
 void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t const contexts_count ) {
-	size_t line_num = 1;
     size_t j = 0;
     io_buffer_t* iobuf = get_optimal_io_buffer(in_stream); 
     int is_tty = isatty(in_stream);
@@ -65,6 +64,7 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
         jased_ctx-> in_stream = in_stream;
         jased_ctx-> out_stream = STDOUT_FILENO;
         jased_ctx-> io_buffer = iobuf;
+        jased_ctx-> current_line = 0;
 
         jased_ctx-> hold_space = hold_space;
         jased_ctx-> pattern_space = pattern_space;
@@ -80,7 +80,7 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
 
 
         for ( j = 0; j < contexts_count; j++ ) {
-            int_contexts[j]-> jased_ctx-> current_line = line_num;
+            int_contexts[j]-> jased_ctx-> current_line++;
             int_contexts[j]-> jased_ctx-> is_last_line = is_last_line;
         }
 
@@ -101,8 +101,6 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
 
         printerr("==================END======================\n");
         #endif
-
-        line_num++;
 
 		if ( res != -1 ) {
             /* interpret all contexts */
