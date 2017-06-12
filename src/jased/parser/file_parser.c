@@ -73,6 +73,7 @@ parse_file( int const file, interpreter_ctx_t* const int_ctx ) {
         exit_stat.is_ok = 0;
         exit_stat.stop_on_symbol = cqueue-> start;
         exit_stat.parser_status = UNCLOSED_CMD_LIST;
+        exit_stat.stopped_on_string = sbuffer_clone( cqueue-> buffer )-> char_at;
 
 
         #ifdef DEBUG_PARSING

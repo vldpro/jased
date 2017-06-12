@@ -285,6 +285,7 @@ DEFINE_NO_PARAMS_CMD( next_append ) {
 	);
 
     jased_ctx-> current_line++;
+    sbuffer_delete(buf);
 
 	return COMPLETED_SUCCESSFULLY;
 }

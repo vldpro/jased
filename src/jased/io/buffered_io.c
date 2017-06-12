@@ -151,9 +151,9 @@ ssize_t println( char const* const str ) {
 ssize_t print_int( int const stream, int const value ) {
     char number[15] = {0};
 
-    sprintf( number, "%d", value );
+    int nums = sprintf( number, "%d", value );
 
-    WRITE( stream, number, 15 );
+    WRITE( stream, number, nums );
 
     return 0;
 }

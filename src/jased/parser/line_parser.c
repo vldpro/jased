@@ -649,6 +649,9 @@ parse_apnd_ins_change( chars_queue_t* const cqueue, interpreter_ctx_t* const int
 	if ( sym != BACKSLASH ) 
 		return INVALID_APPEND_SYNTAX;
 
+    if ( cqueue_gettop(cqueue) == CMD_DELIM_NEWLINE ) 
+        cqueue_getc(cqueue);
+
     append_str = sbuffer_truncate( parse_apnd_ins_change_operand(cqueue) ); 
 
     execlist_set( 

@@ -55,6 +55,8 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
     string_buffer_t* after_buffer   = sbuffer_new();
     string_buffer_t* print_buffer   = sbuffer_new();
 
+    sbuffer_append_char(hold_space,'\n');
+
     if ( contexts_count == 0 ) return;
 
     for ( j = 0; j < contexts_count; j++ ) {
