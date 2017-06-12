@@ -88,7 +88,6 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
         printerr("\n============RUNTIME DEBUG INFO=============\n");
 
         printerr( "-dbg- Current line:" );
-        print_int( STDERR_FILENO, line_num );
         printerr("\n");
 
         printerr("-dbg----------- PATTERN SPACE --------------+\n");
@@ -130,7 +129,11 @@ void run( int const in_stream, interpreter_ctx_t** const int_contexts, size_t co
                         if ( command_exval == UNDEFINED_LABEL_FOR_BRANCH ) {
                             printerr("jased: undefined label for branch.\n");
                             exit(ERROR_RUNTIME);
+                        }
 
+                        if ( command_exval == NEW_CYCLE_WITHOUT_READING ) {
+                            jased_ctx-> command_pointer = 0;
+                            continue;
                         }
 
                         print( STDOUT_FILENO, print_buffer );

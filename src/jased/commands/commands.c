@@ -240,6 +240,7 @@ DEFINE_NO_PARAMS_CMD( delete_first_line_ps ) {
 
 	if ( pattern_space-> char_at[i] == '\0') {
 		sbuffer_clear( jased_ctx-> pattern_space );
+    	jased_ctx-> is_new_cycle_enable = 1;
 	    return COMPLETED_SUCCESSFULLY;
 	}
 
@@ -258,9 +259,7 @@ DEFINE_NO_PARAMS_CMD( delete_first_line_ps ) {
 		pattern_space-> char_at + i + 1 
 	);*/
 
-	jased_ctx-> is_new_cycle_enable = 1;
-
-	return COMPLETED_SUCCESSFULLY;
+	return NEW_CYCLE_WITHOUT_READING;
 }
 
 /* n command */
