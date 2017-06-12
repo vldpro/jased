@@ -522,7 +522,7 @@ parse_sub( chars_queue_t* const cqueue, interpreter_ctx_t* const int_ctx ) {
 				regex_t reg;	
 
 
-				if ( (errcode = regcomp(&reg, regex_str, REG_NEWLINE | REG_EXTENDED)) ) { 
+				if ( (errcode = regcomp(&reg, regex_str, REG_NEWLINE)) ) { 
                     string_buffer_t* errbuf = sbuffer_new();
                     regerror(errcode, &reg, errbuf-> char_at, errbuf-> size);
 

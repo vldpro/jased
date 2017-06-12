@@ -57,7 +57,7 @@ create_regex( chars_queue_t* cqueue, struct condition* const condition ) {
 
     cqueue-> buffer = buf;
 
-	if ( (errcode = regcomp(&reg, regex_str, REG_EXTENDED | REG_NEWLINE)) ) {
+	if ( (errcode = regcomp(&reg, regex_str, REG_NEWLINE)) ) {
         string_buffer_t* errbuf = sbuffer_new();
         regerror( errcode, &reg, errbuf-> char_at, errbuf-> size);
 
