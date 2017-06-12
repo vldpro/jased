@@ -4,7 +4,7 @@
 jased_ctx_t* jased_ctx_new() {
 	jased_ctx_t* new_ctx = (jased_ctx_t*)malloc( sizeof(jased_ctx_t) );
 	
-    new_ctx-> labels = hmap_new( default_hash, LABELS_DEFAULT_SIZE ); 
+    new_ctx-> labels = hmap_new( default_hash, 1000 ); 
 
 	new_ctx-> is_new_cycle_enable = 
         new_ctx-> is_last_line =

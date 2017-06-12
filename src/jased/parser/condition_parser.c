@@ -9,6 +9,7 @@
 #include "jased/parser/util.h"
 #include "jased/parser/condition_parser.h"
 #include "jased/util/chars_queue.h"
+#include "jased/util/escape_transformer.h"
 
 #define PARSER_STATUS parser_status_t
 
@@ -48,7 +49,7 @@ parse_int ( chars_queue_t* const cqueue, struct condition* const condition ) {
 
 static PARSER_STATUS 
 create_regex( chars_queue_t* cqueue, struct condition* const condition ) {
-    string_buffer_t* buf = sbuffer_truncate(cqueue-> buffer);
+    string_buffer_t* buf = escape(sbuffer_truncate(cqueue-> buffer));
 	char* regex_str = buf-> char_at;
 	enum condition_type type = condition-> type;
     int errcode;
@@ -56,7 +57,7 @@ create_regex( chars_queue_t* cqueue, struct condition* const condition ) {
 
     cqueue-> buffer = buf;
 
-	if ( (errcode = regcomp(&reg, regex_str, 0)) ) {
+	if ( (errcode = regcomp(&reg, regex_str, REG_EXTENDED | REG_NEWLINE)) ) {
         string_buffer_t* errbuf = sbuffer_new();
         regerror( errcode, &reg, errbuf-> char_at, errbuf-> size);
 
@@ -65,6 +66,7 @@ create_regex( chars_queue_t* cqueue, struct condition* const condition ) {
         printerr("\n");
 
         sbuffer_delete(errbuf);
+        sbuffer_delete(buf);
 
         return UNCORRECT_REGEX;
     }
